@@ -334,6 +334,68 @@
         }
     },
     "Mappings": {
+        "AWSAMIRegionMap": {
+            "AMI": {
+                "AMZNLINUXHVM": "amzn-ami-hvm-2016.03.3.x86_64-gp2",
+                "AWSNATHVM": "amzn-ami-vpc-nat-hvm-2016.03.3.x86_64-ebs"
+            },
+            "ap-northeast-1": {
+                "AMZNLINUXHVM": "ami-374db956",
+                "AWSNATHVM": "ami-2443b745"
+            },
+            "ap-northeast-2": {
+                "AMZNLINUXHVM": "ami-2b408b45",
+                "AWSNATHVM": "ami-d14388bf"
+            },
+            "ap-south-1": {
+                "AMZNLINUXHVM": "ami-ffbdd790",
+                "AWSNATHVM": "ami-e2b9d38d"
+            },
+            "ap-southeast-1": {
+                "AMZNLINUXHVM": "ami-a59b49c6",
+                "AWSNATHVM": "ami-a79b49c4"
+            },
+            "ap-southeast-2": {
+                "AMZNLINUXHVM": "ami-dc361ebf",
+                "AWSNATHVM": "ami-53371f30"
+            },
+            "ca-central-1": {
+                "AMZNLINUXHVM": "ami-730ebd17",
+                "AWSNATHVM": "ami-32f14356"
+            },
+            "eu-central-1": {
+                "AMZNLINUXHVM": "ami-ea26ce85",
+                "AWSNATHVM": "ami-5825cd37"
+            },
+            "eu-west-1": {
+                "AMZNLINUXHVM": "ami-f9dd458a",
+                "AWSNATHVM": "ami-a8dd45db"
+            },
+            "eu-west-2": {
+                "AMZNLINUXHVM": "ami-886369ec",
+                "AWSNATHVM": "ami-6b4d470f"
+            },
+            "sa-east-1": {
+                "AMZNLINUXHVM": "ami-6dd04501",
+                "AWSNATHVM": "ami-9336bcff"
+            },
+            "us-east-1": {
+                "AMZNLINUXHVM": "ami-6869aa05",
+                "AWSNATHVM": "ami-4868ab25"
+            },
+            "us-east-2": {
+                "AMZNLINUXHVM": "ami-f6035893",
+                "AWSNATHVM": "ami-92a6fef7"
+            },
+            "us-west-1": {
+                "AMZNLINUXHVM": "ami-31490d51",
+                "AWSNATHVM": "ami-004b0f60"
+            },
+            "us-west-2": {
+                "AMZNLINUXHVM": "ami-7172b611",
+                "AWSNATHVM": "ami-a275b1c2"
+            }
+        },
         "AWSInfoRegionMap": {
             "ap-northeast-1": {
                 "Partition": "aws",
@@ -394,82 +456,6 @@
             "us-west-2": {
                 "Partition": "aws",
                 "QuickStartS3URL": "https://s3.amazonaws.com"
-            }
-        },
-        "ALINUXAMI": {
-            "us-east-1": {
-                "AMI": "ami-568bd141"
-            },
-            "us-east-2": {
-                "AMI": "ami-63257f06"
-            },
-            "us-west-1": {
-                "AMI": "ami-cf2268af"
-            },
-            "us-west-2": {
-                "AMI": "ami-7d34921d"
-            },
-            "eu-west-1": {
-                "AMI": "ami-8292d8f1"
-            },
-            "eu-central-1": {
-                "AMI": "ami-3e936851"
-            },
-            "ap-southeast-1": {
-                "AMI": "ami-f41ebf97"
-            },
-            "ap-southeast-2": {
-                "AMI": "ami-662f1305"
-            },
-            "ap-northeast-1": {
-                "AMI": "ami-dfc26fbe"
-            },
-            "ap-northeast-2": {
-                "AMI": "ami-c526f2ab"
-            },
-            "sa-east-1": {
-                "AMI": "ami-5c51cd30"
-            },
-            "ap-south-1": {
-                "AMI": "ami-93a5d1fc"
-            }
-        },
-        "AWSNATAMI": {
-            "us-east-1": {
-                "AMI": "ami-4868ab25"
-            },
-            "us-east-2": {
-                "AMI": "ami-92a6fef7"
-            },
-            "us-west-1": {
-                "AMI": "ami-004b0f60"
-            },
-            "us-west-2": {
-                "AMI": "ami-a275b1c2"
-            },
-            "eu-west-1": {
-                "AMI": "ami-a8dd45db"
-            },
-            "eu-central-1": {
-                "AMI": "ami-5825cd37"
-            },
-            "ap-southeast-1": {
-                "AMI": "ami-a79b49c4"
-            },
-            "ap-southeast-2": {
-                "AMI": "ami-53371f30"
-            },
-            "ap-northeast-1": {
-                "AMI": "ami-2443b745"
-            },
-            "ap-northeast-2": {
-                "AMI": "ami-d14388bf"
-            },
-            "sa-east-1": {
-                "AMI": "ami-9336bcff"
-            },
-            "ap-south-1": {
-                "AMI": "ami-e2b9d38d"
             }
         },
         "SubnetConfig": {
@@ -900,11 +886,11 @@
                 ],
                 "ImageId": {
                     "Fn::FindInMap": [
-                        "AWSNATAMI",
+                        "AWSAMIRegionMap",
                         {
                             "Ref": "AWS::Region"
                         },
-                        "AMI"
+                        "AWSNATHVM"
                     ]
                 }
             }
@@ -934,11 +920,11 @@
                 ],
                 "ImageId": {
                     "Fn::FindInMap": [
-                        "AWSNATAMI",
+                        "AWSAMIRegionMap",
                         {
                             "Ref": "AWS::Region"
                         },
-                        "AMI"
+                        "AWSNATHVM"
                     ]
                 }
             }
@@ -1406,11 +1392,11 @@
                 },
                 "ImageId": {
                     "Fn::FindInMap": [
-                        "ALINUXAMI",
+                        "AWSAMIRegionMap",
                         {
                             "Ref": "AWS::Region"
                         },
-                        "AMI"
+                        "AMZNLINUXHVM"
                     ]
                 },
                 "InstanceMonitoring": "true",
@@ -1724,11 +1710,11 @@
                 },
                 "ImageId": {
                     "Fn::FindInMap": [
-                        "ALINUXAMI",
+                        "AWSAMIRegionMap",
                         {
                             "Ref": "AWS::Region"
                         },
-                        "AMI"
+                        "AMZNLINUXHVM"
                     ]
                 },
                 "InstanceMonitoring": "true",
