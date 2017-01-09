@@ -1455,7 +1455,31 @@
                                 },
                                 "\n",
                                 "export NODE_NAME=share\n",
-                                "curl -L https://raw.githubusercontent.com/aws-quickstart/quickstart-alfresco-one/develop/templates/${NODE_NAME}-51.json > /etc/chef/chef-client.json\n",
+                                "curl -L ",
+                                {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "QSS3BucketName"
+                                            },
+                                            {
+                                                "Ref": "QSS3KeyPrefix"
+                                            },
+                                            "scripts/${NODE_NAME}-51.json"
+                                        ]
+                                    ]
+                                },
+                                " > /etc/chef/chef-client.json\n",
                                 "chmod 440 /etc/chef/chef-client.json\n",
                                 "sed -i 's/@@STACK_NAME@@/",
                                 {
@@ -1748,7 +1772,31 @@
                                 },
                                 "\n",
                                 "export NODE_NAME=solr\n",
-                                "curl -L https://raw.githubusercontent.com/aws-quickstart/quickstart-alfresco-one/develop/templates/${NODE_NAME}-51.json > /etc/chef/chef-client.json\n",
+                                "curl -L ",
+                                {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "QSS3BucketName"
+                                            },
+                                            {
+                                                "Ref": "QSS3KeyPrefix"
+                                            },
+                                            "scripts/${NODE_NAME}-51.json"
+                                        ]
+                                    ]
+                                },
+                                " > /etc/chef/chef-client.json\n",
                                 "chmod 440 /etc/chef/chef-client.json\n",
                                 "sed -i 's/@@STACK_NAME@@/",
                                 {
