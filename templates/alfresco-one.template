@@ -129,69 +129,73 @@
         }
     },
     "Parameters": {
-        "KeyName": {
-            "Type": "AWS::EC2::KeyPair::KeyName",
-            "Description": "Name of an existing EC2 KeyPair, all instances will launch with this KeyPair"
-        },
-        "OperatorEMail": {
-            "Description": "EMail address to notify if there are any scaling operations",
-            "Type": "String",
-            "AllowedPattern": "([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)",
-            "ConstraintDescription": "Must be a valid email address."
-        },
-        "SSHFrom": {
-            "Description": "Lockdown SSH access to the bastion host",
-            "Type": "String",
-            "MinLength": "9",
-            "MaxLength": "18",
-            "Default": "",
-            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
-            "ConstraintDescription": "Must be a valid CIDR range of the form x.x.x.x/x, like 0.0.0.0/0 or fixed IP like x.x.x.x/32."
-        },
         "AZ1": {
-            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "ConstraintDescription": "Must be a valid EC2 Availabilty zone",
             "Description": "First availabiltiy zone to deploy into.",
-            "ConstraintDescription": "Must be a valid EC2 Availabilty zone"
+            "Type": "AWS::EC2::AvailabilityZone::Name"
         },
         "AZ2": {
-            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "ConstraintDescription": "Must be a valid EC2 Availabilty zone",
             "Description": "Second availabiltiy zone to deploy into (must be the same Region as for AZ1)",
-            "ConstraintDescription": "Must be a valid EC2 Availabilty zone"
+            "Type": "AWS::EC2::AvailabilityZone::Name"
         },
         "AlfrescoInstanceType": {
+            "AllowedValues": [
+                "t2.large",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge",
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge",
+                "r3.large",
+                "r3.xlarge"
+            ],
+            "ConstraintDescription": "Must contain valid instance type",
             "Default": "m4.xlarge",
             "Description": "Type of EC2 instance for the Alfresco instances (Share + Repository)",
-            "Type": "String",
-            "AllowedValues": [
-                "t2.large",
-                "m4.large",
-                "m4.xlarge",
-                "m4.2xlarge",
-                "m4.4xlarge",
-                "m4.10xlarge",
-                "m3.medium",
-                "m3.large",
-                "m3.xlarge",
-                "m3.2xlarge",
-                "c4.large",
-                "c4.xlarge",
-                "c4.2xlarge",
-                "c4.4xlarge",
-                "c4.8xlarge",
-                "c3.large",
-                "c3.xlarge",
-                "c3.2xlarge",
-                "c3.4xlarge",
-                "c3.8xlarge",
-                "r3.large",
-                "r3.xlarge"
-            ],
-            "ConstraintDescription": "Must contain valid instance type"
+            "Type": "String"
+        },
+        "AlfrescoNodesDesiredCapacity": {
+            "Default": "2",
+            "Description": "Specifies the desired capacity for the Alfresco nodes Auto Scaling group",
+            "Type": "String"
+        },
+        "AlfrescoNodesMaxSize": {
+            "Default": "4",
+            "Description": "The maximum size of the Auto Scaling group",
+            "Type": "String"
+        },
+        "AlfrescoNodesMinSize": {
+            "Default": "2",
+            "Description": "The minimum size of the Auto Scaling group",
+            "Type": "String"
+        },
+        "AlfrescoPassword": {
+            "Default": "",
+            "Description": "Password for the Alfresco admin user. Introduce your desired password.",
+            "NoEcho": "TRUE",
+            "Type": "String"
+        },
+        "AlfrescoTrialLicense": {
+            "Default": "type a public URL here, i.e. a S3 url with your license",
+            "Description": "URL of your Alfresco trial license *with clustering enabled*. If you don't have one, please ask for it to your Sales representative or to Alfresco Support via http://support.alfresco.com",
+            "Type": "String"
         },
         "IndexInstanceType": {
-            "Default": "m4.xlarge",
-            "Description": "Type of EC2 instance for the Alfresco Index instances (Solr)",
-            "Type": "String",
             "AllowedValues": [
                 "t2.large",
                 "m4.large",
@@ -216,24 +220,68 @@
                 "r3.large",
                 "r3.xlarge"
             ],
-            "ConstraintDescription": "Must contain valid instance type"
+            "ConstraintDescription": "Must contain valid instance type",
+            "Default": "m4.xlarge",
+            "Description": "Type of EC2 instance for the Alfresco Index instances (Solr)",
+            "Type": "String"
+        },
+        "IndexNodesDesiredCapacity": {
+            "Default": "2",
+            "Description": "Specifies the desired capacity for the Index nodes Auto Scaling group",
+            "Type": "String"
+        },
+        "IndexNodesMaxSize": {
+            "Default": "4",
+            "Description": "The maximum size of the Auto Scaling group",
+            "Type": "String"
+        },
+        "IndexNodesMinSize": {
+            "Default": "2",
+            "Description": "The minimum size of the Auto Scaling group",
+            "Type": "String"
+        },
+        "KeyName": {
+            "Description": "Name of an existing EC2 KeyPair, all instances will launch with this KeyPair",
+            "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "NATInstanceType": {
-            "Default": "t2.small",
-            "Description": "Type of EC2 instance for the NAT instances",
-            "Type": "String",
             "AllowedValues": [
                 "t2.micro",
                 "t2.small",
                 "t2.medium",
                 "t2.large"
             ],
-            "ConstraintDescription": "Must contain valid instance type"
+            "ConstraintDescription": "Must contain valid instance type",
+            "Default": "t2.small",
+            "Description": "Type of EC2 instance for the NAT instances",
+            "Type": "String"
+        },
+        "OperatorEMail": {
+            "AllowedPattern": "([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)",
+            "ConstraintDescription": "Must be a valid email address.",
+            "Description": "EMail address to notify if there are any scaling operations",
+            "Type": "String"
+        },
+        "QSS3BucketName": {
+            "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
+            "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Default": "quickstart-reference",
+            "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Type": "String"
+        },
+        "QSS3KeyPrefix": {
+            "AllowedPattern": "^[0-9a-zA-Z-]+(/[0-9a-zA-Z-]+)*$",
+            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
+            "Default": "alfresco/one/latest",
+            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
+            "Type": "String"
+        },
+        "RDSDBName": {
+            "Default": "alfresco",
+            "Description": "DB Name for the RDS MySQL database",
+            "Type": "String"
         },
         "RDSInstanceType": {
-            "Default": "db.t2.small",
-            "Description": "Type of EC2 instance for the MySQL DB instances",
-            "Type": "String",
             "AllowedValues": [
                 "db.t2.medium",
                 "db.t2.large",
@@ -254,69 +302,35 @@
                 "db.m4.large",
                 "db.m4.xlarge"
             ],
-            "ConstraintDescription": "Must contain valid RDS instance type"
-        },
-        "RDSDBName": {
-            "Default": "alfresco",
-            "Type": "String",
-            "Description": "DB Name for the RDS MySQL database"
-        },
-        "RDSUsername": {
-            "Default": "alfresco",
-            "Type": "String",
-            "Description": "Username for the RDS MySQL database"
+            "ConstraintDescription": "Must contain valid RDS instance type",
+            "Default": "db.t2.small",
+            "Description": "Type of EC2 instance for the MySQL DB instances",
+            "Type": "String"
         },
         "RDSPassword": {
             "Default": "alfresco",
-            "Type": "String",
             "Description": "Password for the RDS MySQL database, by default: alfresco",
-            "NoEcho": "TRUE"
+            "NoEcho": "TRUE",
+            "Type": "String"
+        },
+        "RDSUsername": {
+            "Default": "alfresco",
+            "Description": "Username for the RDS MySQL database",
+            "Type": "String"
         },
         "S3BucketName": {
-            "Type": "String",
             "Default": "your-company-unique-name-alf-12345",
-            "Description": "Name of the S3 bucket that Alfresco should use to store data. Note: This bucket will be created, enter a unique name, do not use contain uppercase characters."
+            "Description": "Name of the S3 bucket that Alfresco should use to store data. Note: This bucket will be created, enter a unique name, do not use contain uppercase characters.",
+            "Type": "String"
         },
-        "AlfrescoPassword": {
-            "Type": "String",
-            "Description": "Password for the Alfresco admin user. Introduce your desired password.",
+        "SSHFrom": {
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "Must be a valid CIDR range of the form x.x.x.x/x, like 0.0.0.0/0 or fixed IP like x.x.x.x/32.",
             "Default": "",
-            "NoEcho": "TRUE"
-        },
-        "AlfrescoTrialLicense": {
-            "Type": "String",
-            "Description": "URL of your Alfresco trial license *with clustering enabled*. If you don't have one, please ask for it to your Sales representative or to Alfresco Support via http://support.alfresco.com",
-            "Default": "type a public URL here, i.e. a S3 url with your license"
-        },
-        "AlfrescoNodesMinSize": {
-            "Type": "String",
-            "Description": "The minimum size of the Auto Scaling group",
-            "Default": "2"
-        },
-        "AlfrescoNodesMaxSize": {
-            "Type": "String",
-            "Description": "The maximum size of the Auto Scaling group",
-            "Default": "4"
-        },
-        "AlfrescoNodesDesiredCapacity": {
-            "Type": "String",
-            "Description": "Specifies the desired capacity for the Alfresco nodes Auto Scaling group",
-            "Default": "2"
-        },
-        "IndexNodesMinSize": {
-            "Type": "String",
-            "Description": "The minimum size of the Auto Scaling group",
-            "Default": "2"
-        },
-        "IndexNodesMaxSize": {
-            "Type": "String",
-            "Description": "The maximum size of the Auto Scaling group",
-            "Default": "4"
-        },
-        "IndexNodesDesiredCapacity": {
-            "Type": "String",
-            "Description": "Specifies the desired capacity for the Index nodes Auto Scaling group",
-            "Default": "2"
+            "Description": "Lockdown SSH access to the bastion host",
+            "MaxLength": "18",
+            "MinLength": "9",
+            "Type": "String"
         }
     },
     "Mappings": {
