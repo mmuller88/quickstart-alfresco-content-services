@@ -336,63 +336,55 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "AMZNLINUXHVM": "amzn-ami-hvm-2016.03.3.x86_64-gp2",
+                "ALFRESCOONEHVM": "Alfresco One 5.1.1.5 CloudFormation AMI 0.0.40 - 1477326469-580bd3b9-d7b4-498e-8c54-15e5c39b4087-ami-dd035fca.3",
                 "AWSNATHVM": "amzn-ami-vpc-nat-hvm-2016.03.3.x86_64-ebs"
             },
             "ap-northeast-1": {
-                "AMZNLINUXHVM": "ami-374db956",
+                "ALFRESCOONEHVM": "ami-dfc26fbe",
                 "AWSNATHVM": "ami-2443b745"
             },
             "ap-northeast-2": {
-                "AMZNLINUXHVM": "ami-2b408b45",
+                "ALFRESCOONEHVM": "ami-c526f2ab",
                 "AWSNATHVM": "ami-d14388bf"
             },
             "ap-south-1": {
-                "AMZNLINUXHVM": "ami-ffbdd790",
+                "ALFRESCOONEHVM": "ami-93a5d1fc",
                 "AWSNATHVM": "ami-e2b9d38d"
             },
             "ap-southeast-1": {
-                "AMZNLINUXHVM": "ami-a59b49c6",
+                "ALFRESCOONEHVM": "ami-f41ebf97",
                 "AWSNATHVM": "ami-a79b49c4"
             },
             "ap-southeast-2": {
-                "AMZNLINUXHVM": "ami-dc361ebf",
+                "ALFRESCOONEHVM": "ami-662f1305",
                 "AWSNATHVM": "ami-53371f30"
             },
-            "ca-central-1": {
-                "AMZNLINUXHVM": "ami-730ebd17",
-                "AWSNATHVM": "ami-32f14356"
-            },
             "eu-central-1": {
-                "AMZNLINUXHVM": "ami-ea26ce85",
+                "ALFRESCOONEHVM": "ami-3e936851",
                 "AWSNATHVM": "ami-5825cd37"
             },
             "eu-west-1": {
-                "AMZNLINUXHVM": "ami-f9dd458a",
+                "ALFRESCOONEHVM": "ami-8292d8f1",
                 "AWSNATHVM": "ami-a8dd45db"
             },
-            "eu-west-2": {
-                "AMZNLINUXHVM": "ami-886369ec",
-                "AWSNATHVM": "ami-6b4d470f"
-            },
             "sa-east-1": {
-                "AMZNLINUXHVM": "ami-6dd04501",
+                "ALFRESCOONEHVM": "ami-5c51cd30",
                 "AWSNATHVM": "ami-9336bcff"
             },
             "us-east-1": {
-                "AMZNLINUXHVM": "ami-6869aa05",
+                "ALFRESCOONEHVM": "ami-568bd141",
                 "AWSNATHVM": "ami-4868ab25"
             },
             "us-east-2": {
-                "AMZNLINUXHVM": "ami-f6035893",
+                "ALFRESCOONEHVM": "ami-63257f06",
                 "AWSNATHVM": "ami-92a6fef7"
             },
             "us-west-1": {
-                "AMZNLINUXHVM": "ami-31490d51",
+                "ALFRESCOONEHVM": "ami-cf2268af",
                 "AWSNATHVM": "ami-004b0f60"
             },
             "us-west-2": {
-                "AMZNLINUXHVM": "ami-7172b611",
+                "ALFRESCOONEHVM": "ami-7d34921d",
                 "AWSNATHVM": "ami-a275b1c2"
             }
         },
@@ -417,19 +409,11 @@
                 "Partition": "aws",
                 "QuickStartS3URL": "https://s3.amazonaws.com"
             },
-            "ca-central-1": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
             "eu-central-1": {
                 "Partition": "aws",
                 "QuickStartS3URL": "https://s3.amazonaws.com"
             },
             "eu-west-1": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "eu-west-2": {
                 "Partition": "aws",
                 "QuickStartS3URL": "https://s3.amazonaws.com"
             },
@@ -1396,7 +1380,7 @@
                         {
                             "Ref": "AWS::Region"
                         },
-                        "AMZNLINUXHVM"
+                        "ALFRESCOONEHVM"
                     ]
                 },
                 "InstanceMonitoring": "true",
@@ -1714,7 +1698,7 @@
                         {
                             "Ref": "AWS::Region"
                         },
-                        "AMZNLINUXHVM"
+                        "ALFRESCOONEHVM"
                     ]
                 },
                 "InstanceMonitoring": "true",
