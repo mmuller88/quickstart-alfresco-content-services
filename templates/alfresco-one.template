@@ -59,29 +59,35 @@
                         "SSHFrom",
                         "NATInstanceType"
                     ]
+                },
+                {
+                    "Label": {
+                        "default": "AWS Quick Start Configuration"
+                    },
+                    "Parameters": [
+                        "QSS3BucketName",
+                        "QSS3KeyPrefix"
+                    ]
                 }
             ],
             "ParameterLabels": {
+                "AZ1": {
+                    "default": "Availability Zone 1"
+                },
+                "AZ2": {
+                    "default": "Availability Zone 2"
+                },
                 "AlfrescoInstanceType": {
                     "default": "Alfresco Servers Instance Type"
                 },
-                "IndexInstanceType": {
-                    "default": "Index Servers Instance Type"
+                "AlfrescoNodesDesiredCapacity": {
+                    "default": "Alfresco Nodes Desired Capacity"
                 },
-                "RDSDBName": {
-                    "default": "RDS DB Name"
+                "AlfrescoNodesMaxSize": {
+                    "default": "Alfresco Nodes Max Size"
                 },
-                "RDSInstanceType": {
-                    "default": "RDS Instance Type"
-                },
-                "RDSUsername": {
-                    "default": "RDS User Name"
-                },
-                "RDSPassword": {
-                    "default": "RDS Password"
-                },
-                "S3BucketName": {
-                    "default": "S3 Bucket Name"
+                "AlfrescoNodesMinSize": {
+                    "default": "Alfresco Nodes Min Size"
                 },
                 "AlfrescoPassword": {
                     "default": "Alfresco Admin Password"
@@ -89,41 +95,50 @@
                 "AlfrescoTrialLicense": {
                     "default": "Alfresco Trial License Location URL"
                 },
-                "AZ1": {
-                    "default": "Availability Zone 1"
-                },
-                "AZ2": {
-                    "default": "Availability Zone 2"
-                },
-                "AlfrescoNodesMinSize": {
-                    "default": "Alfresco Nodes Min Size"
-                },
-                "AlfrescoNodesMaxSize": {
-                    "default": "Alfresco Nodes Max Size"
-                },
-                "AlfrescoNodesDesiredCapacity": {
-                    "default": "Alfresco Nodes Desired Capacity"
-                },
-                "IndexNodesMinSize": {
-                    "default": "Index Nodes Min Size"
-                },
-                "IndexNodesMaxSize": {
-                    "default": "Index Nodes Max Size"
+                "IndexInstanceType": {
+                    "default": "Index Servers Instance Type"
                 },
                 "IndexNodesDesiredCapacity": {
                     "default": "Index Nodes Desired Capacity"
                 },
-                "OperatorEMail": {
-                    "default": "Operator EMail"
+                "IndexNodesMaxSize": {
+                    "default": "Index Nodes Max Size"
+                },
+                "IndexNodesMinSize": {
+                    "default": "Index Nodes Min Size"
                 },
                 "KeyName": {
                     "default": "SSH Key Name"
                 },
-                "SSHFrom": {
-                    "default": "SSH From"
-                },
                 "NATInstanceType": {
                     "default": "NAT Instance Type"
+                },
+                "OperatorEMail": {
+                    "default": "Operator EMail"
+                },
+                "QSS3BucketName": {
+                    "default": "Quick Start S3 Bucket Name"
+                },
+                "QSS3KeyPrefix": {
+                    "default": "Quick Start S3 Key Prefix"
+                },
+                "RDSDBName": {
+                    "default": "RDS DB Name"
+                },
+                "RDSInstanceType": {
+                    "default": "RDS Instance Type"
+                },
+                "RDSPassword": {
+                    "default": "RDS Password"
+                },
+                "RDSUsername": {
+                    "default": "RDS User Name"
+                },
+                "S3BucketName": {
+                    "default": "S3 Bucket Name"
+                },
+                "SSHFrom": {
+                    "default": "SSH From"
                 }
             }
         }
