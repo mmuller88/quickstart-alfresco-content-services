@@ -1374,8 +1374,30 @@
                     "Install": {
                         "files": {
                             "/etc/chef/chef-client.json": {
-                                "source": "https://raw.githubusercontent.com/toniblyx/quickstart-alfresco-one/develop/templates/share-51.json?token=ADzQOLj6iWqdQkL5pUsNh4v3ydnBb-yhks5YgnzFwA%3D%3D",
-                                "mode": "000400",
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "QSS3BucketName"
+                                            },
+                                            {
+                                                "Ref": "QSS3KeyPrefix"
+                                            },
+                                            "scripts/share-51.json"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000700",
                                 "owner": "root",
                                 "group": "root"
                             },
@@ -1736,8 +1758,30 @@
                     "Install": {
                         "files": {
                             "/etc/chef/chef-client.json": {
-                                "source": "https://raw.githubusercontent.com/toniblyx/quickstart-alfresco-one/develop/templates/solr-51.json?token=ADzQOLj6iWqdQkL5pUsNh4v3ydnBb-yhks5YgnzFwA%3D%3D",
-                                "mode": "000400",
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "QSS3BucketName"
+                                            },
+                                            {
+                                                "Ref": "QSS3KeyPrefix"
+                                            },
+                                            "scripts/solr-51.json"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000700",
                                 "owner": "root",
                                 "group": "root"
                             },
