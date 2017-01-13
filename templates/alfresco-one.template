@@ -324,12 +324,9 @@
             "Type": "String"
         },
         "SSHFrom": {
-            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
-            "ConstraintDescription": "Must be a valid CIDR range of the form x.x.x.x/x, like 0.0.0.0/0 or fixed IP like x.x.x.x/32.",
-            "Default": "",
-            "Description": "Lockdown SSH access to the bastion host",
-            "MaxLength": "18",
-            "MinLength": "9",
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "Must be a valid CIDR range of the form x.x.x.x/x, like fixed IP like x.x.x.x/32.",
+            "Description": "Allowed CIDR block for external access to the NAT/Bastion servers",
             "Type": "String"
         }
     },
@@ -1370,6 +1367,151 @@
         },
         "AlfrescoASLaunchConfig": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                  "configSets": {
+                      "InstallAndRun": [
+                          "Install",
+                          "Configure"
+                      ]
+                  },
+                  "Install": {
+                      "files": {
+                          "/etc/chef/chef-client.json": {
+                              "source": "https://raw.githubusercontent.com/toniblyx/quickstart-alfresco-one/develop/templates/share-51.json?token=ADzQOLj6iWqdQkL5pUsNh4v3ydnBb-yhks5YgnzFwA%3D%3D",
+                              "mode": "000400",
+                              "owner": "root",
+                              "group": "root"
+                          },
+                          "/etc/chef/replaceValues.sh": {
+                              "content": {
+                                  "Fn::Join": [
+                                      "",
+                                      [
+                                          "#!/bin/bash\n",
+                                          "sed -i 's/@@STACK_NAME@@/",
+                                          {
+                                              "Ref": "AWS::StackName"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@FQDN@@/",
+                                          {
+                                              "Fn::GetAtt": [
+                                                  "ElasticLoadBalancer",
+                                                  "DNSName"
+                                              ]
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@AWS_ACCESS_KEY@@/",
+                                          {
+                                              "Ref": "CfnKeys"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's#@@AWS_SECRET_KEY@@#",
+                                          {
+                                              "Fn::GetAtt": [
+                                                  "CfnKeys",
+                                                  "SecretAccessKey"
+                                              ]
+                                          },
+                                          "#g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@DB_HOST@@/",
+                                          {
+                                              "Fn::GetAtt": [
+                                                  "RDSDBInstance",
+                                                  "Endpoint.Address"
+                                              ]
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@DB_NAME@@/",
+                                          {
+                                              "Ref": "RDSDBName"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@DB_USERNAME@@/",
+                                          {
+                                              "Ref": "RDSUsername"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@DB_PASSWORD@@/",
+                                          {
+                                              "Ref": "RDSPassword"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@CONTENTSTORE_S3_BUCKET@@/",
+                                          {
+                                              "Ref": "S3BucketName"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@AWS_REGION@@/",
+                                          {
+                                              "Ref": "AWS::Region"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "ALFPASS=$(printf %s ",
+                                          {
+                                              "Ref": "AlfrescoPassword"
+                                          },
+                                          " | iconv -t utf16le | openssl md4| awk '{ print $2}')\n",
+                                          "sed -i \"s/@@ALFRESCO_PASSWORD@@/$ALFPASS/g\" /etc/chef/chef-client.json\n",
+                                          "export INSTANCEIDX=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
+                                          "sed -i \"s/@@JVM_ROUTE@@/share-$INSTANCEIDX/g\" /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@AWS_SG_NAME@@/AlfrescoSecurityGroup/g' /etc/chef/chef-client.json\n",
+                                          "export LOCALIP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)\n",
+                                          "export LOCALNAME=$(curl http://169.254.169.254/latest/meta-data/local-hostname)\n",
+                                          "export LOCALSHORTNAME=$(curl http://169.254.169.254/latest/meta-data/hostname|awk -F. '{print $1}')\n",
+                                          "echo \"$LOCALIP $LOCALSHORTNAME $LOCALNAME\" >> /etc/hosts\n",
+                                          "curl -L ",{ "Ref": "AlfrescoTrialLicense" }," -o /usr/share/tomcat/shared/classes/alfresco/extension/license/license.lic\n"
+                                      ]
+                                  ]
+                              },
+                              "mode": "000700",
+                              "owner": "root",
+                              "group": "root"
+                          },
+                          "/etc/chef/run.sh": {
+                              "content": {
+                                  "Fn::Join": [
+                                      "",
+                                      [
+                                          "#!/bin/bash\n",
+                                          "systemctl stop mysql-default\n",
+                                          "systemctl disable mysql-default\n",
+                                          "systemctl stop tomcat-solr\n",
+                                          "systemctl disable tomcat-solr\n",
+                                          "yum remove -y mysql-server\n",
+                                          "rm -fr /etc/mysql-default* /var/lib/mysql* /var/log/mysql-default* /usr/lib/systemd/system/mysql-default.service\n",
+                                          "rm -fr /etc/tomcat-solr /var/lib/tomcat-solr /usr/share/tomcat-solr /var/log/tomcat-solr /var/cache/tomcat-solr /usr/share/tomcat/alf_data/solrhome /usr/share/tomcat/alf_data/solrContentStore /usr/share/tomcat/alf_data/solr4Backup /usr/share/tomcat/alf_data/newAlfrescoModels /etc/sysconfig/tomcat-solr /etc/cron.d/solr-cleaner.cron /usr/lib/systemd/system/tomcat-solr.service\n",
+                                          "cd /etc/chef; chef-client -z -j chef-client.json\n",
+                                          "curl 'http://localhost/alfresco/s/enterprise/admin?t=%2Fenterprise%2Fadmin%2Fadmin-transformations' -u admin:", { "Ref": "AlfrescoPassword" }, " -H 'Content-Type: multipart/form-data; boundary=123456789' --data-binary $'--123456789\\r\\nContent-Disposition: form-data; name=\"Alfresco:Type=Configuration,Category=OOoJodconverter,id1=default|jodconverter.enabled\"\\r\\n\\r\\nfalse\\r\\n--123456789'\n",
+                                          "curl 'http://localhost/alfresco/s/enterprise/admin?t=%2Fenterprise%2Fadmin%2Fadmin-transformations' -u admin:", { "Ref": "AlfrescoPassword" }, " -H 'Content-Type: multipart/form-data; boundary=123456789' --data-binary $'--123456789\\r\\nContent-Disposition: form-data; name=\"Alfresco:Type=Configuration,Category=OOoJodconverter,id1=default|jodconverter.enabled\"\\r\\n\\r\\ntrue\\r\\n--123456789'\n",
+                                          "rm -fr /etc/chef/chef-client.json\n",
+                                          "chmod 700 /usr/share/tomcat/shared/classes/alfresco-global.properties\n",
+                                          "chmod 700 /usr/share/tomcat/shared/classes/alfresco/web-extension/share-cluster-application-context.xml\n",
+                                          "rm -fr /etc/chef/replaceValues.sh\n",
+                                          "rm -fr /etc/chef/run.sh\n"
+
+                                      ]
+                                  ]
+                              },
+                              "mode": "000700",
+                              "owner": "root",
+                              "group": "root"
+                          }
+                      }
+                   },
+                   "Configure": {
+                       "commands": {
+                           "01_ReplaceValues": {
+                               "command": "/etc/chef/replaceValues.sh"
+                           },
+                           "02_RunChef": {
+                               "command": "/etc/chef/run.sh"
+                           }
+                       }
+                   }
+                }
+            },
             "Properties": {
                 "KeyName": {
                     "Ref": "KeyName"
@@ -1407,145 +1549,25 @@
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                " -r AlfrescoASLaunchConfig",
-                                "    --access-key ",
-                                {
-                                    "Ref": "CfnKeys"
-                                },
-                                "    --secret-key ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "CfnKeys",
-                                        "SecretAccessKey"
-                                    ]
-                                },
+                                "    --resource AlfrescoASLaunchConfig",
+                                "    --configsets InstallAndRun",
                                 "    --region     ",
                                 {
                                     "Ref": "AWS::Region"
                                 },
                                 "\n",
-                                "export NODE_NAME=share\n",
-                                "curl -L ",
-                                {
-                                    "Fn::Join": [
-                                        "/",
-                                        [
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "AWSInfoRegionMap",
-                                                    {
-                                                        "Ref": "AWS::Region"
-                                                    },
-                                                    "QuickStartS3URL"
-                                                ]
-                                            },
-                                            {
-                                                "Ref": "QSS3BucketName"
-                                            },
-                                            {
-                                                "Ref": "QSS3KeyPrefix"
-                                            },
-                                            "scripts/${NODE_NAME}-51.json"
-                                        ]
-                                    ]
-                                },
-                                " > /etc/chef/chef-client.json\n",
-                                "chmod 440 /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@STACK_NAME@@/",
+                                "# Signal the status from cfn-init\n",
+                                "/usr/bin/cfn-signal -e $? ",
+                                " --stack ",
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@FQDN@@/",
-                                {
-                                    "Fn::GetAtt": [
-                                        "ElasticLoadBalancer",
-                                        "DNSName"
-                                    ]
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@AWS_ACCESS_KEY@@/",
-                                {
-                                    "Ref": "CfnKeys"
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's#@@AWS_SECRET_KEY@@#",
-                                {
-                                    "Fn::GetAtt": [
-                                        "CfnKeys",
-                                        "SecretAccessKey"
-                                    ]
-                                },
-                                "#g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@DB_HOST@@/",
-                                {
-                                    "Fn::GetAtt": [
-                                        "RDSDBInstance",
-                                        "Endpoint.Address"
-                                    ]
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@DB_NAME@@/",
-                                {
-                                    "Ref": "RDSDBName"
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@DB_USERNAME@@/",
-                                {
-                                    "Ref": "RDSUsername"
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@DB_PASSWORD@@/",
-                                {
-                                    "Ref": "RDSPassword"
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@CONTENTSTORE_S3_BUCKET@@/",
-                                {
-                                    "Ref": "S3BucketName"
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@AWS_REGION@@/",
+                                " --resource AlfrescoASLaunchConfig ",
+                                " --region ",
                                 {
                                     "Ref": "AWS::Region"
                                 },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "ALFPASS=$(printf %s ",
-                                {
-                                    "Ref": "AlfrescoPassword"
-                                },
-                                " | iconv -t utf16le | openssl md4| awk '{ print $2}')\n",
-                                "sed -i \"s/@@ALFRESCO_PASSWORD@@/$ALFPASS/g\" /etc/chef/chef-client.json\n",
-                                "export INSTANCEIDX=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
-                                "sed -i \"s/@@JVM_ROUTE@@/share-$INSTANCEIDX/g\" /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@AWS_SG_NAME@@/AlfrescoSecurityGroup/g' /etc/chef/chef-client.json\n",
-                                "export LOCALIP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)\n",
-                                "export LOCALNAME=$(curl http://169.254.169.254/latest/meta-data/local-hostname)\n",
-                                "export LOCALSHORTNAME=$(curl http://169.254.169.254/latest/meta-data/hostname|awk -F. '{print $1}')\n",
-                                "echo \"$LOCALIP $LOCALSHORTNAME $LOCALNAME\" >> /etc/hosts\n",
-                                "curl -L ",
-                                {
-                                    "Ref": "AlfrescoTrialLicense"
-                                },
-                                " -o /usr/share/tomcat/shared/classes/alfresco/extension/license/license.lic\n",
-                                "systemctl stop mysql-default\n",
-                                "systemctl disable mysql-default\n",
-                                "systemctl stop tomcat-solr\n",
-                                "systemctl disable tomcat-solr\n",
-                                "yum remove -y mysql-server\n",
-                                "rm -fr /etc/mysql-default* /var/lib/mysql* /var/log/mysql-default* /usr/lib/systemd/system/mysql-default.service\n",
-                                "rm -fr /etc/tomcat-solr /var/lib/tomcat-solr /usr/share/tomcat-solr /var/log/tomcat-solr /var/cache/tomcat-solr /usr/share/tomcat/alf_data/solrhome /usr/share/tomcat/alf_data/solrContentStore /usr/share/tomcat/alf_data/solr4Backup /usr/share/tomcat/alf_data/newAlfrescoModels /etc/sysconfig/tomcat-solr /etc/cron.d/solr-cleaner.cron /usr/lib/systemd/system/tomcat-solr.service\n",
-                                "cd /etc/chef; chef-client -z -j chef-client.json\n",
-                                "curl 'http://localhost/alfresco/s/enterprise/admin?t=%2Fenterprise%2Fadmin%2Fadmin-transformations' -u admin:",
-                                {
-                                    "Ref": "AlfrescoPassword"
-                                },
-                                " -H 'Content-Type: multipart/form-data; boundary=123456789' --data-binary $'--123456789\\r\\nContent-Disposition: form-data; name=\"Alfresco:Type=Configuration,Category=OOoJodconverter,id1=default|jodconverter.enabled\"\\r\\n\\r\\nfalse\\r\\n--123456789'\n",
-                                "curl 'http://localhost/alfresco/s/enterprise/admin?t=%2Fenterprise%2Fadmin%2Fadmin-transformations' -u admin:",
-                                {
-                                    "Ref": "AlfrescoPassword"
-                                },
-                                " -H 'Content-Type: multipart/form-data; boundary=123456789' --data-binary $'--123456789\\r\\nContent-Disposition: form-data; name=\"Alfresco:Type=Configuration,Category=OOoJodconverter,id1=default|jodconverter.enabled\"\\r\\n\\r\\ntrue\\r\\n--123456789'\n"
+                                "\n"
                             ]
                         ]
                     }
@@ -1684,10 +1706,176 @@
                         "PropagateAtLaunch": "true"
                     }
                 ]
+            },
+            "CreationPolicy": {
+                "ResourceSignal": {
+                    "Count": { "Ref": "AlfrescoNodesDesiredCapacity" },
+                    "Timeout": "PT2H"
+                }
             }
         },
         "IndexASLaunchConfig": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                  "configSets": {
+                      "InstallAndRun": [
+                          "Install",
+                          "Configure"
+                      ]
+                  },
+                  "Install": {
+                      "files": {
+                          "/etc/chef/chef-client.json": {
+                              "source": "https://raw.githubusercontent.com/toniblyx/quickstart-alfresco-one/develop/templates/solr-51.json?token=ADzQOLj6iWqdQkL5pUsNh4v3ydnBb-yhks5YgnzFwA%3D%3D",
+                              "mode": "000400",
+                              "owner": "root",
+                              "group": "root"
+                          },
+                          "/etc/chef/replaceValues.sh": {
+                              "content": {
+                                  "Fn::Join": [
+                                      "",
+                                      [
+                                          "#!/bin/bash\n",
+                                          "sed -i 's/@@STACK_NAME@@/",
+                                          {
+                                              "Ref": "AWS::StackName"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@FQDN@@/",
+                                          {
+                                              "Fn::GetAtt": [
+                                                  "ElasticLoadBalancer",
+                                                  "DNSName"
+                                              ]
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@AWS_ACCESS_KEY@@/",
+                                          {
+                                              "Ref": "CfnKeys"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's#@@AWS_SECRET_KEY@@#",
+                                          {
+                                              "Fn::GetAtt": [
+                                                  "CfnKeys",
+                                                  "SecretAccessKey"
+                                              ]
+                                          },
+                                          "#g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@DB_HOST@@/",
+                                          {
+                                              "Fn::GetAtt": [
+                                                  "RDSDBInstance",
+                                                  "Endpoint.Address"
+                                              ]
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@DB_NAME@@/",
+                                          {
+                                              "Ref": "RDSDBName"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@DB_USERNAME@@/",
+                                          {
+                                              "Ref": "RDSUsername"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@DB_PASSWORD@@/",
+                                          {
+                                              "Ref": "RDSPassword"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@CONTENTSTORE_S3_BUCKET@@/",
+                                          {
+                                              "Ref": "S3BucketName"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@AWS_REGION@@/",
+                                          {
+                                              "Ref": "AWS::Region"
+                                          },
+                                          "/g' /etc/chef/chef-client.json\n",
+                                          "ALFPASS=$(printf %s ",
+                                          {
+                                              "Ref": "AlfrescoPassword"
+                                          },
+                                          " | iconv -t utf16le | openssl md4| awk '{ print $2}')\n",
+                                          "sed -i \"s/@@ALFRESCO_PASSWORD@@/$ALFPASS/g\" /etc/chef/chef-client.json\n",
+                                          "export INSTANCEIDX=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
+                                          "sed -i \"s/@@JVM_ROUTE@@/solr-$INSTANCEIDX/g\" /etc/chef/chef-client.json\n",
+                                          "sed -i 's/@@AWS_SG_NAME@@/AlfrescoSecurityGroup/g' /etc/chef/chef-client.json\n",
+                                          "export LOCALIP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4) \n",
+                                          "export LOCALNAME=$(curl http://169.254.169.254/latest/meta-data/local-hostname)\n ",
+                                          "export LOCALSHORTNAME=$(curl http://169.254.169.254/latest/meta-data/hostname|awk -F. '{print $1}')\n",
+                                          "echo \"$LOCALIP $LOCALSHORTNAME $LOCALNAME\" >> /etc/hosts\n",
+                                          "curl -L ",
+                                          {
+                                              "Ref": "AlfrescoTrialLicense"
+                                          },
+                                          " -o /usr/share/tomcat/shared/classes/alfresco/extension/license/license.lic\n"
+                                      ]
+                                  ]
+                              },
+                              "mode": "000700",
+                              "owner": "root",
+                              "group": "root"
+                          },
+                          "/etc/chef/run.sh": {
+                              "content": {
+                                  "Fn::Join": [
+                                      "",
+                                      [
+                                          "#!/bin/bash\n",
+                                          "systemctl disable haproxy\n",
+                                          "systemctl stop haproxy\n",
+                                          "yum remove -y haproxy\n",
+                                          "rm -fr /etc/haproxy/haproxy.cfg\n",
+                                          "rm -fr /var/log/haproxy\n",
+                                          "systemctl stop mysql-default\n",
+                                          "systemctl disable mysql-default\n",
+                                          "systemctl stop tomcat-solr\n",
+                                          "systemctl disable tomcat-solr\n",
+                                          "yum remove -y mysql-server\n",
+                                          "rm -fr /etc/mysql-default* /var/lib/mysql* /var/log/mysql-default* /usr/lib/systemd/system/mysql-default.service\n",
+                                          "rm -fr /etc/tomcat-share /var/lib/tomcat-share /usr/share/tomcat-share /var/log/tomcat-share /var/cache/tomcat-share /etc/sysconfig/tomcat-share /usr/lib/systemd/system/tomcat-share.service\n",
+                                          "cd /etc/chef; chef-client -z -j chef-client.json\n",
+                                          "curl 'http://localhost/alfresco/s/enterprise/admin?t=%2Fenterprise%2Fadmin%2Fadmin-transformations' -u admin:",
+                                          {
+                                              "Ref": "AlfrescoPassword"
+                                          },
+                                          " -H 'Content-Type: multipart/form-data; boundary=123456789' --data-binary $'--123456789\\r\\nContent-Disposition: form-data; name=\"Alfresco:Type=Configuration,Category=OOoJodconverter,id1=default|jodconverter.enabled\"\\r\\n\\r\\nfalse\\r\\n--123456789'\n",
+                                          "curl 'http://localhost/alfresco/s/enterprise/admin?t=%2Fenterprise%2Fadmin%2Fadmin-transformations' -u admin:",
+                                          {
+                                              "Ref": "AlfrescoPassword"
+                                          },
+                                          " -H 'Content-Type: multipart/form-data; boundary=123456789' --data-binary $'--123456789\\r\\nContent-Disposition: form-data; name=\"Alfresco:Type=Configuration,Category=OOoJodconverter,id1=default|jodconverter.enabled\"\\r\\n\\r\\ntrue\\r\\n--123456789'\n",
+                                          "rm -fr /etc/chef/chef-client.json\n",
+                                          "chmod 700 /usr/share/tomcat/shared/classes/alfresco-global.properties\n",
+                                          "rm -fr /etc/chef/replaceValues.sh\n",
+                                          "rm -fr /etc/chef/run.sh\n"
+                                      ]
+                                  ]
+                              },
+                              "mode": "000700",
+                              "owner": "root",
+                              "group": "root"
+                          }
+                      }
+                   },
+                   "Configure": {
+                       "commands": {
+                           "01_ReplaceValues": {
+                               "command": "/etc/chef/replaceValues.sh"
+                           },
+                           "02_RunChef": {
+                               "command": "/etc/chef/run.sh"
+                           }
+                       }
+                   }
+                }
+            },
             "Properties": {
                 "KeyName": {
                     "Ref": "KeyName"
@@ -1725,149 +1913,25 @@
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                "    --access-key ",
-                                {
-                                    "Ref": "CfnKeys"
-                                },
-                                "    --secret-key ",
-                                {
-                                    "Fn::GetAtt": [
-                                        "CfnKeys",
-                                        "SecretAccessKey"
-                                    ]
-                                },
+                                "    --resource IndexASLaunchConfig",
+                                "    --configsets InstallAndRun ",
                                 "    --region     ",
                                 {
                                     "Ref": "AWS::Region"
                                 },
                                 "\n",
-                                "export NODE_NAME=solr\n",
-                                "curl -L ",
-                                {
-                                    "Fn::Join": [
-                                        "/",
-                                        [
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "AWSInfoRegionMap",
-                                                    {
-                                                        "Ref": "AWS::Region"
-                                                    },
-                                                    "QuickStartS3URL"
-                                                ]
-                                            },
-                                            {
-                                                "Ref": "QSS3BucketName"
-                                            },
-                                            {
-                                                "Ref": "QSS3KeyPrefix"
-                                            },
-                                            "scripts/${NODE_NAME}-51.json"
-                                        ]
-                                    ]
-                                },
-                                " > /etc/chef/chef-client.json\n",
-                                "chmod 440 /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@STACK_NAME@@/",
+                                "# Signal the status from cfn-init\n",
+                                "/usr/bin/cfn-signal -e $? ",
+                                " --stack ",
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@FQDN@@/",
-                                {
-                                    "Fn::GetAtt": [
-                                        "ElasticLoadBalancer",
-                                        "DNSName"
-                                    ]
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@AWS_ACCESS_KEY@@/",
-                                {
-                                    "Ref": "CfnKeys"
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's#@@AWS_SECRET_KEY@@#",
-                                {
-                                    "Fn::GetAtt": [
-                                        "CfnKeys",
-                                        "SecretAccessKey"
-                                    ]
-                                },
-                                "#g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@DB_HOST@@/",
-                                {
-                                    "Fn::GetAtt": [
-                                        "RDSDBInstance",
-                                        "Endpoint.Address"
-                                    ]
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@DB_NAME@@/",
-                                {
-                                    "Ref": "RDSDBName"
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@DB_USERNAME@@/",
-                                {
-                                    "Ref": "RDSUsername"
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@DB_PASSWORD@@/",
-                                {
-                                    "Ref": "RDSPassword"
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@CONTENTSTORE_S3_BUCKET@@/",
-                                {
-                                    "Ref": "S3BucketName"
-                                },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@AWS_REGION@@/",
+                                " --resource IndexASLaunchConfig",
+                                " --region ",
                                 {
                                     "Ref": "AWS::Region"
                                 },
-                                "/g' /etc/chef/chef-client.json\n",
-                                "ALFPASS=$(printf %s ",
-                                {
-                                    "Ref": "AlfrescoPassword"
-                                },
-                                " | iconv -t utf16le | openssl md4| awk '{ print $2}')\n",
-                                "sed -i \"s/@@ALFRESCO_PASSWORD@@/$ALFPASS/g\" /etc/chef/chef-client.json\n",
-                                "export INSTANCEIDX=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
-                                "sed -i \"s/@@JVM_ROUTE@@/solr-$INSTANCEIDX/g\" /etc/chef/chef-client.json\n",
-                                "sed -i 's/@@AWS_SG_NAME@@/AlfrescoSecurityGroup/g' /etc/chef/chef-client.json\n",
-                                "export LOCALIP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4) \n",
-                                "export LOCALNAME=$(curl http://169.254.169.254/latest/meta-data/local-hostname)\n ",
-                                "export LOCALSHORTNAME=$(curl http://169.254.169.254/latest/meta-data/hostname|awk -F. '{print $1}')\n",
-                                "echo \"$LOCALIP $LOCALSHORTNAME $LOCALNAME\" >> /etc/hosts\n",
-                                "curl -L ",
-                                {
-                                    "Ref": "AlfrescoTrialLicense"
-                                },
-                                " -o /usr/share/tomcat/shared/classes/alfresco/extension/license/license.lic\n",
-                                "systemctl disable haproxy\n",
-                                "systemctl stop haproxy\n",
-                                "yum remove -y haproxy\n",
-                                "rm -fr /etc/haproxy/haproxy.cfg\n",
-                                "rm -fr /var/log/haproxy\n",
-                                "systemctl stop mysql-default\n",
-                                "systemctl disable mysql-default\n",
-                                "systemctl stop tomcat-solr\n",
-                                "systemctl disable tomcat-solr\n",
-                                "yum remove -y mysql-server\n",
-                                "rm -fr /etc/mysql-default* /var/lib/mysql* /var/log/mysql-default* /usr/lib/systemd/system/mysql-default.service\n",
-                                "rm -fr /etc/tomcat-share /var/lib/tomcat-share /usr/share/tomcat-share /var/log/tomcat-share /var/cache/tomcat-share /etc/sysconfig/tomcat-share /usr/lib/systemd/system/tomcat-share.service\n",
-                                "cd /etc/chef; chef-client -z -j chef-client.json\n",
-                                "curl 'http://localhost/alfresco/s/enterprise/admin?t=%2Fenterprise%2Fadmin%2Fadmin-transformations' -u admin:",
-                                {
-                                    "Ref": "AlfrescoPassword"
-                                },
-                                " -H 'Content-Type: multipart/form-data; boundary=123456789' --data-binary $'--123456789\\r\\nContent-Disposition: form-data; name=\"Alfresco:Type=Configuration,Category=OOoJodconverter,id1=default|jodconverter.enabled\"\\r\\n\\r\\nfalse\\r\\n--123456789'\n",
-                                "curl 'http://localhost/alfresco/s/enterprise/admin?t=%2Fenterprise%2Fadmin%2Fadmin-transformations' -u admin:",
-                                {
-                                    "Ref": "AlfrescoPassword"
-                                },
-                                " -H 'Content-Type: multipart/form-data; boundary=123456789' --data-binary $'--123456789\\r\\nContent-Disposition: form-data; name=\"Alfresco:Type=Configuration,Category=OOoJodconverter,id1=default|jodconverter.enabled\"\\r\\n\\r\\ntrue\\r\\n--123456789'\n"
+                                "\n"
                             ]
                         ]
                     }
@@ -2006,6 +2070,12 @@
                         "PropagateAtLaunch": "true"
                     }
                 ]
+            },
+            "CreationPolicy": {
+                "ResourceSignal": {
+                    "Count": { "Ref": "IndexNodesDesiredCapacity" },
+                    "Timeout": "PT2H"
+                }
             }
         },
         "RDSSubnet1": {
