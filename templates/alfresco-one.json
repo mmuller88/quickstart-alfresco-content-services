@@ -1,0 +1,86 @@
+[
+    {
+        "ParameterKey": "AZ1",
+        "ParameterValue": "$[alfred_gensingleaz_1]"
+    },
+    {
+        "ParameterKey": "AZ2",
+        "ParameterValue": "$[alfred_gensingleaz_2]"
+    },
+    {
+        "ParameterKey": "AlfrescoInstanceType",
+        "ParameterValue": "m4.xlarge"
+    },
+    {
+        "ParameterKey": "AlfrescoNodesDesiredCapacity",
+        "ParameterValue": "2"
+    },
+    {
+        "ParameterKey": "AlfrescoNodesMaxSize",
+        "ParameterValue": "4"
+    },
+    {
+        "ParameterKey": "AlfrescoNodesMinSize",
+        "ParameterValue": "2"
+    },
+    {
+        "ParameterKey": "AlfrescoPassword",
+        "ParameterValue": "$[alfred_genpass_16]"
+    },
+    {
+        "ParameterKey": "AlfrescoTrialLicense",
+        "ParameterValue": "type a public URL here, i.e. a S3 url with your license"
+    },
+    {
+        "ParameterKey": "IndexInstanceType",
+        "ParameterValue": "m4.xlarge"
+    },
+    {
+        "ParameterKey": "IndexNodesDesiredCapacity",
+        "ParameterValue": "2"
+    },
+    {
+        "ParameterKey": "IndexNodesMaxSize",
+        "ParameterValue": "4"
+    },
+    {
+        "ParameterKey": "IndexNodesMinSize",
+        "ParameterValue": "2"
+    },
+    {
+        "ParameterKey": "KeyName",
+        "ParameterValue": "cikey"
+    },
+    {
+        "ParameterKey": "NATInstanceType",
+        "ParameterValue": "t2.small"
+    },
+    {
+        "ParameterKey": "OperatorEMail",
+        "ParameterValue": "operator@example.com"
+    },
+    {
+        "ParameterKey": "RDSDBName",
+        "ParameterValue": "alfresco"
+    },
+    {
+        "ParameterKey": "RDSInstanceType",
+        "ParameterValue": "db.t2.small"
+    },
+    {
+        "ParameterKey": "RDSPassword",
+        "ParameterValue": "$[alfred_genpass_16]"
+    },
+    {
+        "ParameterKey": "RDSUsername",
+        "ParameterValue": "alfresco"
+    },
+    {
+        "ParameterKey": "S3BucketName",
+        "ParameterValue": ""
+    },
+    {
+        "ParameterKey": "SSHFrom",
+        "ParameterValue": "10.0.0.0/16"
+    }
+]
