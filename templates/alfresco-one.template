@@ -200,9 +200,8 @@
             "Type": "String"
         },
         "AlfrescoPassword": {
-            "Default": "",
             "Description": "Password for the Alfresco admin user. Introduce your desired password.",
-            "NoEcho": "TRUE",
+            "NoEcho": "True",
             "Type": "String"
         },
         "AlfrescoTrialLicense": {
@@ -323,9 +322,8 @@
             "Type": "String"
         },
         "RDSPassword": {
-            "Default": "alfresco",
-            "Description": "Password for the RDS MySQL database, by default: alfresco",
-            "NoEcho": "TRUE",
+            "Description": "Password for the RDS MySQL database",
+            "NoEcho": "True",
             "Type": "String"
         },
         "RDSUsername": {
@@ -334,7 +332,7 @@
             "Type": "String"
         },
         "S3BucketName": {
-            "Default": "your-company-unique-name-alf-12345",
+            "Default": "",
             "Description": "Name of the S3 bucket that Alfresco should use to store data. Note: This bucket will be created, enter a unique name, do not use contain uppercase characters.",
             "Type": "String"
         },
@@ -472,6 +470,20 @@
             "RDS2": {
                 "CIDR": "10.0.200.0/24"
             }
+        }
+    },
+    "Conditions": {
+        "CustomS3BucketName": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "S3BucketName"
+                        },
+                        ""
+                    ]
+                }
+            ]
         }
     },
     "Resources": {
@@ -1473,7 +1485,7 @@
                                             "/g' /etc/chef/chef-client.json\n",
                                             "sed -i 's/@@CONTENTSTORE_S3_BUCKET@@/",
                                             {
-                                                "Ref": "S3BucketName"
+                                                "Ref": "S3Bucket"
                                             },
                                             "/g' /etc/chef/chef-client.json\n",
                                             "sed -i 's/@@AWS_REGION@@/",
@@ -1857,7 +1869,7 @@
                                             "/g' /etc/chef/chef-client.json\n",
                                             "sed -i 's/@@CONTENTSTORE_S3_BUCKET@@/",
                                             {
-                                                "Ref": "S3BucketName"
+                                                "Ref": "S3Bucket"
                                             },
                                             "/g' /etc/chef/chef-client.json\n",
                                             "sed -i 's/@@AWS_REGION@@/",
@@ -2209,7 +2221,15 @@
             "DeletionPolicy": "Retain",
             "Properties": {
                 "BucketName": {
-                    "Ref": "S3BucketName"
+                    "Fn::If": [
+                        "CustomS3BucketName",
+                        {
+                            "Ref": "S3BucketName"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
                 },
                 "AccessControl": "BucketOwnerFullControl"
             }
