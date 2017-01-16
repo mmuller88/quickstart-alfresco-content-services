@@ -1618,7 +1618,7 @@
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --resource AlfrescoASLaunchConfig ",
+                                " --resource AlfrescoAutoScalingGroup",
                                 " --region ",
                                 {
                                     "Ref": "AWS::Region"
@@ -2006,7 +2006,7 @@
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --resource IndexASLaunchConfig",
+                                " --resource IndexAutoScalingGroup",
                                 " --region ",
                                 {
                                     "Ref": "AWS::Region"
