@@ -279,7 +279,7 @@
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-            "Default": "quickstart-reference",
+            "Default": "quickstart-reference-santiago",
             "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
@@ -1543,6 +1543,7 @@
                                             },
                                             " -H 'Content-Type: multipart/form-data; boundary=123456789' --data-binary $'--123456789\\r\\nContent-Disposition: form-data; name=\"Alfresco:Type=Configuration,Category=OOoJodconverter,id1=default|jodconverter.enabled\"\\r\\n\\r\\ntrue\\r\\n--123456789'\n",
                                             "rm -fr /etc/chef/chef-client.json\n",
+                                            "rm -fr /etc/chef/nodes/*.json\n",
                                             "chmod 700 /usr/share/tomcat/shared/classes/alfresco-global.properties\n",
                                             "chmod 700 /usr/share/tomcat/shared/classes/alfresco/web-extension/share-cluster-application-context.xml\n",
                                             "rm -fr /etc/chef/replaceValues.sh\n",
@@ -1908,6 +1909,9 @@
                                         "",
                                         [
                                             "#!/bin/bash\n",
+                                            "systemctl stop nginx\n",
+                                            "systemctl disable nginx\n",
+                                            "yum remove -y nginx\n",
                                             "systemctl disable haproxy\n",
                                             "systemctl stop haproxy\n",
                                             "yum remove -y haproxy\n",
@@ -1932,6 +1936,7 @@
                                             },
                                             " -H 'Content-Type: multipart/form-data; boundary=123456789' --data-binary $'--123456789\\r\\nContent-Disposition: form-data; name=\"Alfresco:Type=Configuration,Category=OOoJodconverter,id1=default|jodconverter.enabled\"\\r\\n\\r\\ntrue\\r\\n--123456789'\n",
                                             "rm -fr /etc/chef/chef-client.json\n",
+                                            "rm -fr /etc/chef/nodes/*.json\n",
                                             "chmod 700 /usr/share/tomcat/shared/classes/alfresco-global.properties\n",
                                             "rm -fr /etc/chef/replaceValues.sh\n",
                                             "rm -fr /etc/chef/run.sh\n"
