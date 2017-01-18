@@ -1,33 +1,33 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Alfresco One on AWS main template ** Version 2.0 ** This template will create a new VPC, and deploy an Alfresco cluster behind an ELB in 2 availabiltiy zones, the cluster will be configured to use an S3 bucket for storage and an multi-AZ MySQL RDS instance will be used as the database. **This version supports all AWS regions except GovCloud** QS(5025)",
+    "Description": "This is the Alfresco One on AWS worklaod template which deploys an Alfresco cluster behind an ELB in two private subnets. The cluster is configured to use an S3 bucket for storage and a multi-AZ MySQL RDS instance for the database. **WARNING** This template creates Amazon EC2 instance and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(5025)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
                 {
                     "Label": {
-                        "default": "Alfresco Nodes"
+                        "default": "Network Configuration"
                     },
                     "Parameters": [
+                        "VPCID",
+                        "PrivateSubnet1ID",
+                        "PrivateSubnet2ID"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Amazon EC2 Configuration"
+                    },
+                    "Parameters": [
+                        "KeyPairName",
+                        "BastionSecurityGroupID",
                         "AlfrescoInstanceType",
                         "IndexInstanceType"
                     ]
                 },
                 {
                     "Label": {
-                        "default": "Alfresco Storage"
-                    },
-                    "Parameters": [
-                        "RDSDBName",
-                        "RDSInstanceType",
-                        "RDSUsername",
-                        "RDSPassword",
-                        "S3BucketName"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Alfresco Configuration"
+                        "default": "Alfresco General Configuration"
                     },
                     "Parameters": [
                         "AlfrescoPassword",
@@ -36,11 +36,9 @@
                 },
                 {
                     "Label": {
-                        "default": "Scalability and Resilience"
+                        "default": "Alfresco Nodes Configuration"
                     },
                     "Parameters": [
-                        "AZ1",
-                        "AZ2",
                         "AlfrescoNodesMinSize",
                         "AlfrescoNodesMaxSize",
                         "AlfrescoNodesDesiredCapacity",
@@ -52,12 +50,14 @@
                 },
                 {
                     "Label": {
-                        "default": "Security"
+                        "default": "Alfresco Storage Configuration"
                     },
                     "Parameters": [
-                        "KeyName",
-                        "SSHFrom",
-                        "NATInstanceType"
+                        "RDSInstanceType",
+                        "RDSDBName",
+                        "RDSUsername",
+                        "RDSPassword",
+                        "S3BucketName"
                     ]
                 },
                 {
@@ -71,12 +71,6 @@
                 }
             ],
             "ParameterLabels": {
-                "AZ1": {
-                    "default": "Availability Zone 1"
-                },
-                "AZ2": {
-                    "default": "Availability Zone 2"
-                },
                 "AlfrescoInstanceType": {
                     "default": "Alfresco Servers Instance Type"
                 },
@@ -95,6 +89,9 @@
                 "AlfrescoTrialLicense": {
                     "default": "Alfresco Trial License Location URL"
                 },
+                "BastionSecurityGroupID": {
+                    "default": "Bastion Security Group ID"
+                },
                 "IndexInstanceType": {
                     "default": "Index Servers Instance Type"
                 },
@@ -107,14 +104,17 @@
                 "IndexNodesMinSize": {
                     "default": "Index Nodes Min Size"
                 },
-                "KeyName": {
+                "KeyPairName": {
                     "default": "SSH Key Name"
-                },
-                "NATInstanceType": {
-                    "default": "NAT Instance Type"
                 },
                 "OperatorEMail": {
                     "default": "Operator EMail"
+                },
+                "PrivateSubnet1ID": {
+                    "default": "Private Subnet 1 ID"
+                },
+                "PrivateSubnet2ID": {
+                    "default": "Private Subnet 2 ID"
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 Bucket Name"
@@ -137,23 +137,13 @@
                 "S3BucketName": {
                     "default": "S3 Bucket Name"
                 },
-                "SSHFrom": {
-                    "default": "SSH From"
+                "VPCID": {
+                    "default": "VPC ID"
                 }
             }
         }
     },
     "Parameters": {
-        "AZ1": {
-            "ConstraintDescription": "Must be a valid EC2 Availabilty zone",
-            "Description": "First availabiltiy zone to deploy into.",
-            "Type": "AWS::EC2::AvailabilityZone::Name"
-        },
-        "AZ2": {
-            "ConstraintDescription": "Must be a valid EC2 Availabilty zone",
-            "Description": "Second availabiltiy zone to deploy into (must be the same Region as for AZ1)",
-            "Type": "AWS::EC2::AvailabilityZone::Name"
-        },
         "AlfrescoInstanceType": {
             "AllowedValues": [
                 "t2.large",
@@ -209,6 +199,10 @@
             "Description": "URL of your Alfresco trial license *with clustering enabled*. If you don't have one, please ask for it to your Sales representative or to Alfresco Support via http://support.alfresco.com",
             "Type": "String"
         },
+        "BastionSecurityGroupID": {
+            "Description": "ID of the Bastion Security Group to allow SSH connections from (e.g., sg-7f16e910)",
+            "Type": "AWS::EC2::SecurityGroup::Id"
+        },
         "IndexInstanceType": {
             "AllowedValues": [
                 "t2.large",
@@ -254,27 +248,23 @@
             "Description": "The minimum size of the Auto Scaling group",
             "Type": "String"
         },
-        "KeyName": {
+        "KeyPairName": {
             "Description": "Name of an existing EC2 KeyPair, all instances will launch with this KeyPair",
             "Type": "AWS::EC2::KeyPair::KeyName"
-        },
-        "NATInstanceType": {
-            "AllowedValues": [
-                "t2.micro",
-                "t2.small",
-                "t2.medium",
-                "t2.large"
-            ],
-            "ConstraintDescription": "Must contain valid instance type",
-            "Default": "t2.small",
-            "Description": "Type of EC2 instance for the NAT instances",
-            "Type": "String"
         },
         "OperatorEMail": {
             "AllowedPattern": "([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)",
             "ConstraintDescription": "Must be a valid email address.",
             "Description": "EMail address to notify if there are any scaling operations",
             "Type": "String"
+        },
+        "PrivateSubnet1ID": {
+            "Description": "ID of the private subnet 1 in Availability Zone 1 (e.g., subnet-a0246dcd)",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "PrivateSubnet2ID": {
+            "Description": "ID of the private subnet 2 in Availability Zone 2 (e.g., subnet-a0246dcd)",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
@@ -336,11 +326,9 @@
             "Description": "Name of the S3 bucket that Alfresco should use to store data. Note: This bucket will be created, enter a unique name, do not use contain uppercase characters.",
             "Type": "String"
         },
-        "SSHFrom": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            "ConstraintDescription": "Must be a valid CIDR range of the form x.x.x.x/x, like fixed IP like x.x.x.x/32.",
-            "Description": "Allowed CIDR block for external access to the NAT/Bastion servers",
-            "Type": "String"
+        "VPCID": {
+            "Description": "VPC ID",
+            "Type": "AWS::EC2::VPC::Id"
         }
     },
     "Mappings": {
@@ -447,29 +435,6 @@
                 "Partition": "aws",
                 "QuickStartS3URL": "https://s3.amazonaws.com"
             }
-        },
-        "SubnetConfig": {
-            "VPC": {
-                "CIDR": "10.0.0.0/16"
-            },
-            "NAT1": {
-                "CIDR": "10.0.1.0/24"
-            },
-            "NAT2": {
-                "CIDR": "10.0.2.0/24"
-            },
-            "Alfresco1": {
-                "CIDR": "10.0.10.0/27"
-            },
-            "Alfresco2": {
-                "CIDR": "10.0.20.0/27"
-            },
-            "RDS1": {
-                "CIDR": "10.0.100.0/24"
-            },
-            "RDS2": {
-                "CIDR": "10.0.200.0/24"
-            }
         }
     },
     "Conditions": {
@@ -500,439 +465,6 @@
                 ]
             }
         },
-        "VPC": {
-            "Type": "AWS::EC2::VPC",
-            "Properties": {
-                "CidrBlock": {
-                    "Fn::FindInMap": [
-                        "SubnetConfig",
-                        "VPC",
-                        "CIDR"
-                    ]
-                },
-                "Tags": [
-                    {
-                        "Key": "Application",
-                        "Value": "Alfresco Cluster behind ELB with S3 for shared storage and RDS (MySQL) for database"
-                    }
-                ]
-            }
-        },
-        "InternetGateway": {
-            "Type": "AWS::EC2::InternetGateway"
-        },
-        "AttachGateway": {
-            "Type": "AWS::EC2::VPCGatewayAttachment",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "InternetGatewayId": {
-                    "Ref": "InternetGateway"
-                }
-            }
-        },
-        "AlfrescoSubnet1": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "CidrBlock": {
-                    "Fn::FindInMap": [
-                        "SubnetConfig",
-                        "Alfresco1",
-                        "CIDR"
-                    ]
-                },
-                "Tags": [
-                    {
-                        "Key": "Application",
-                        "Value": "Alfresco"
-                    },
-                    {
-                        "Key": "Network",
-                        "Value": "Private"
-                    }
-                ],
-                "AvailabilityZone": {
-                    "Ref": "AZ1"
-                }
-            }
-        },
-        "AlfrescoSubnet2": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "CidrBlock": {
-                    "Fn::FindInMap": [
-                        "SubnetConfig",
-                        "Alfresco2",
-                        "CIDR"
-                    ]
-                },
-                "Tags": [
-                    {
-                        "Key": "Application",
-                        "Value": "Alfresco"
-                    },
-                    {
-                        "Key": "Network",
-                        "Value": "Private"
-                    }
-                ],
-                "AvailabilityZone": {
-                    "Ref": "AZ2"
-                }
-            }
-        },
-        "NATSubnet1": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "CidrBlock": {
-                    "Fn::FindInMap": [
-                        "SubnetConfig",
-                        "NAT1",
-                        "CIDR"
-                    ]
-                },
-                "Tags": [
-                    {
-                        "Key": "Application",
-                        "Value": "NAT"
-                    },
-                    {
-                        "Key": "Network",
-                        "Value": "Public"
-                    }
-                ],
-                "AvailabilityZone": {
-                    "Ref": "AZ1"
-                }
-            }
-        },
-        "NATSubnet2": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "CidrBlock": {
-                    "Fn::FindInMap": [
-                        "SubnetConfig",
-                        "NAT2",
-                        "CIDR"
-                    ]
-                },
-                "Tags": [
-                    {
-                        "Key": "Application",
-                        "Value": "NAT"
-                    },
-                    {
-                        "Key": "Network",
-                        "Value": "Public"
-                    }
-                ],
-                "AvailabilityZone": {
-                    "Ref": "AZ2"
-                }
-            }
-        },
-        "RecoveryNAT1Alarm": {
-            "Type": "AWS::CloudWatch::Alarm",
-            "Properties": {
-                "AlarmDescription": "Trigger a recovery when instance NAT1 status check fails for 15 consecutive minutes.",
-                "Namespace": "AWS/EC2",
-                "MetricName": "StatusCheckFailed_System",
-                "Statistic": "Minimum",
-                "Period": "60",
-                "EvaluationPeriods": "15",
-                "ComparisonOperator": "GreaterThanThreshold",
-                "Threshold": "0",
-                "AlarmActions": [
-                    {
-                        "Fn::Join": [
-                            "",
-                            [
-                                "arn:aws:automate:",
-                                {
-                                    "Ref": "AWS::Region"
-                                },
-                                ":ec2:recover"
-                            ]
-                        ]
-                    }
-                ],
-                "Dimensions": [
-                    {
-                        "Name": "InstanceId",
-                        "Value": {
-                            "Ref": "NATInstance1"
-                        }
-                    }
-                ]
-            }
-        },
-        "RecoveryNAT2Alarm": {
-            "Type": "AWS::CloudWatch::Alarm",
-            "Properties": {
-                "AlarmDescription": "Trigger a recovery when instance NAT1 status check fails for 15 consecutive minutes.",
-                "Namespace": "AWS/EC2",
-                "MetricName": "StatusCheckFailed_System",
-                "Statistic": "Minimum",
-                "Period": "60",
-                "EvaluationPeriods": "15",
-                "ComparisonOperator": "GreaterThanThreshold",
-                "Threshold": "0",
-                "AlarmActions": [
-                    {
-                        "Fn::Join": [
-                            "",
-                            [
-                                "arn:aws:automate:",
-                                {
-                                    "Ref": "AWS::Region"
-                                },
-                                ":ec2:recover"
-                            ]
-                        ]
-                    }
-                ],
-                "Dimensions": [
-                    {
-                        "Name": "InstanceId",
-                        "Value": {
-                            "Ref": "NATInstance2"
-                        }
-                    }
-                ]
-            }
-        },
-        "NATEIP1": {
-            "Type": "AWS::EC2::EIP",
-            "Properties": {
-                "Domain": "vpc"
-            }
-        },
-        "NATEIP2": {
-            "Type": "AWS::EC2::EIP",
-            "Properties": {
-                "Domain": "vpc"
-            }
-        },
-        "NATSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "Enable internal access to the NAT device",
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": {
-                            "Ref": "SSHFrom"
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
-                        "CidrIp": "10.0.0.0/16"
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "443",
-                        "ToPort": "443",
-                        "CidrIp": "10.0.0.0/16"
-                    }
-                ],
-                "SecurityGroupEgress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
-                        "CidrIp": "0.0.0.0/0"
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "443",
-                        "ToPort": "443",
-                        "CidrIp": "0.0.0.0/0"
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": {
-                            "Fn::FindInMap": [
-                                "SubnetConfig",
-                                "Alfresco2",
-                                "CIDR"
-                            ]
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": {
-                            "Fn::FindInMap": [
-                                "SubnetConfig",
-                                "Alfresco1",
-                                "CIDR"
-                            ]
-                        }
-                    }
-                ]
-            }
-        },
-        "NATInterface1": {
-            "Type": "AWS::EC2::NetworkInterface",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "NATSubnet1"
-                },
-                "Description": "External interface for the NAT instance in AZ1",
-                "GroupSet": [
-                    {
-                        "Ref": "NATSecurityGroup"
-                    }
-                ],
-                "SourceDestCheck": "false",
-                "Tags": [
-                    {
-                        "Key": "Network",
-                        "Value": "Public"
-                    }
-                ]
-            }
-        },
-        "NATInterface2": {
-            "Type": "AWS::EC2::NetworkInterface",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "NATSubnet2"
-                },
-                "Description": "External interface for the NAT instance in AZ1",
-                "GroupSet": [
-                    {
-                        "Ref": "NATSecurityGroup"
-                    }
-                ],
-                "SourceDestCheck": "false",
-                "Tags": [
-                    {
-                        "Key": "Network",
-                        "Value": "Public"
-                    }
-                ]
-            }
-        },
-        "AssociateInterfaceNAT1": {
-            "Type": "AWS::EC2::EIPAssociation",
-            "Properties": {
-                "AllocationId": {
-                    "Fn::GetAtt": [
-                        "NATEIP1",
-                        "AllocationId"
-                    ]
-                },
-                "NetworkInterfaceId": {
-                    "Ref": "NATInterface1"
-                }
-            }
-        },
-        "AssociateInterfaceNAT2": {
-            "Type": "AWS::EC2::EIPAssociation",
-            "Properties": {
-                "AllocationId": {
-                    "Fn::GetAtt": [
-                        "NATEIP2",
-                        "AllocationId"
-                    ]
-                },
-                "NetworkInterfaceId": {
-                    "Ref": "NATInterface2"
-                }
-            }
-        },
-        "NATInstance1": {
-            "Type": "AWS::EC2::Instance",
-            "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "NAT Instance 1"
-                    }
-                ],
-                "InstanceType": {
-                    "Ref": "NATInstanceType"
-                },
-                "KeyName": {
-                    "Ref": "KeyName"
-                },
-                "NetworkInterfaces": [
-                    {
-                        "NetworkInterfaceId": {
-                            "Ref": "NATInterface1"
-                        },
-                        "DeviceIndex": "0"
-                    }
-                ],
-                "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        "AWSNATHVM"
-                    ]
-                }
-            }
-        },
-        "NATInstance2": {
-            "Type": "AWS::EC2::Instance",
-            "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "NAT Instance 2"
-                    }
-                ],
-                "InstanceType": {
-                    "Ref": "NATInstanceType"
-                },
-                "KeyName": {
-                    "Ref": "KeyName"
-                },
-                "NetworkInterfaces": [
-                    {
-                        "NetworkInterfaceId": {
-                            "Ref": "NATInterface2"
-                        },
-                        "DeviceIndex": "0"
-                    }
-                ],
-                "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        "AWSNATHVM"
-                    ]
-                }
-            }
-        },
         "ELBSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
@@ -951,14 +483,6 @@
                         "IpProtocol": "tcp",
                         "FromPort": "443",
                         "ToPort": "443",
-                        "CidrIp": "0.0.0.0/0"
-                    }
-                ],
-                "SecurityGroupEgress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "0",
-                        "ToPort": "65535",
                         "CidrIp": "0.0.0.0/0"
                     }
                 ]
@@ -1003,128 +527,6 @@
                     "UnhealthyThreshold": "3",
                     "Interval": "30",
                     "Timeout": "3"
-                }
-            }
-        },
-        "PublicRouteTable": {
-            "Type": "AWS::EC2::RouteTable",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "Tags": [
-                    {
-                        "Key": "Application",
-                        "Value": "ELB and NAT Instance"
-                    }
-                ]
-            }
-        },
-        "PublicRoute": {
-            "Type": "AWS::EC2::Route",
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "PublicRouteTable"
-                },
-                "DestinationCidrBlock": "0.0.0.0/0",
-                "GatewayId": {
-                    "Ref": "InternetGateway"
-                }
-            }
-        },
-        "AlfrescoRouteTable1": {
-            "Type": "AWS::EC2::RouteTable",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "Tags": [
-                    {
-                        "Key": "Application",
-                        "Value": "Alfresco"
-                    }
-                ]
-            }
-        },
-        "AlfrescoRoute1": {
-            "Type": "AWS::EC2::Route",
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "AlfrescoRouteTable1"
-                },
-                "DestinationCidrBlock": "0.0.0.0/0",
-                "InstanceId": {
-                    "Ref": "NATInstance1"
-                }
-            }
-        },
-        "AlfrescoRouteTable2": {
-            "Type": "AWS::EC2::RouteTable",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "Tags": [
-                    {
-                        "Key": "Application",
-                        "Value": "Alfresco"
-                    }
-                ]
-            }
-        },
-        "AlfrescoRoute2": {
-            "Type": "AWS::EC2::Route",
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "AlfrescoRouteTable2"
-                },
-                "DestinationCidrBlock": "0.0.0.0/0",
-                "InstanceId": {
-                    "Ref": "NATInstance2"
-                }
-            }
-        },
-        "AlfrescoSubnetRouteTableAssociation1": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "AlfrescoSubnet1"
-                },
-                "RouteTableId": {
-                    "Ref": "AlfrescoRouteTable1"
-                }
-            }
-        },
-        "AlfrescoSubnetRouteTableAssociation2": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "AlfrescoSubnet2"
-                },
-                "RouteTableId": {
-                    "Ref": "AlfrescoRouteTable2"
-                }
-            }
-        },
-        "PublicSubnetRouteTableAssociation1": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "NATSubnet1"
-                },
-                "RouteTableId": {
-                    "Ref": "PublicRouteTable"
-                }
-            }
-        },
-        "PublicSubnetRouteTableAssociation2": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "NATSubnet2"
-                },
-                "RouteTableId": {
-                    "Ref": "PublicRouteTable"
                 }
             }
         },
@@ -1345,7 +747,7 @@
             "Properties": {
                 "GroupDescription": "Security group for RDS DB Instance.",
                 "VpcId": {
-                    "Ref": "VPC"
+                    "Ref": "VPCID"
                 },
                 "SecurityGroupIngress": [
                     {
@@ -1387,6 +789,69 @@
                 }
             },
             "DeletionPolicy": "Snapshot"
+        },
+        "AlfrescoSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Allow access to the Alfresco One instances",
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "80",
+                        "ToPort": "80",
+                        "SourceSecurityGroupId": {
+                            "Ref": "ELBSecurityGroup"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "443",
+                        "ToPort": "443",
+                        "SourceSecurityGroupId": {
+                            "Ref": "ELBSecurityGroup"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "SourceSecurityGroupId": {
+                            "Ref": "BastionSecurityGroupID"
+                        }
+                    }
+                ]
+            }
+        },
+        "AlfrescoSecurityGroup5701Ingress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "AlfrescoSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "5701",
+                "ToPort": "5701",
+                "SourceSecurityGroupName": {
+                    "Ref": "AlfrescoSecurityGroup"
+                }
+            }
+        },
+        "AlfrescoSecurityGroup8090Ingress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "AlfrescoSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "8090",
+                "ToPort": "8090",
+                "SourceSecurityGroupName": {
+                    "Ref": "AlfrescoSecurityGroup"
+                }
+            }
         },
         "AlfrescoASLaunchConfig": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
@@ -1571,7 +1036,7 @@
             },
             "Properties": {
                 "KeyName": {
-                    "Ref": "KeyName"
+                    "Ref": "KeyPairName"
                 },
                 "ImageId": {
                     "Fn::FindInMap": [
@@ -1963,7 +1428,7 @@
             },
             "Properties": {
                 "KeyName": {
-                    "Ref": "KeyName"
+                    "Ref": "KeyPairName"
                 },
                 "ImageId": {
                     "Fn::FindInMap": [
@@ -2165,62 +1630,6 @@
                 }
             }
         },
-        "RDSSubnet1": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "CidrBlock": {
-                    "Fn::FindInMap": [
-                        "SubnetConfig",
-                        "RDS1",
-                        "CIDR"
-                    ]
-                },
-                "Tags": [
-                    {
-                        "Key": "Application",
-                        "Value": "RDS"
-                    },
-                    {
-                        "Key": "Network",
-                        "Value": "Private"
-                    }
-                ],
-                "AvailabilityZone": {
-                    "Ref": "AZ1"
-                }
-            }
-        },
-        "RDSSubnet2": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "CidrBlock": {
-                    "Fn::FindInMap": [
-                        "SubnetConfig",
-                        "RDS2",
-                        "CIDR"
-                    ]
-                },
-                "Tags": [
-                    {
-                        "Key": "Application",
-                        "Value": "RDS"
-                    },
-                    {
-                        "Key": "Network",
-                        "Value": "Private"
-                    }
-                ],
-                "AvailabilityZone": {
-                    "Ref": "AZ2"
-                }
-            }
-        },
         "S3Bucket": {
             "Type": "AWS::S3::Bucket",
             "DeletionPolicy": "Retain",
@@ -2237,127 +1646,6 @@
                     ]
                 },
                 "AccessControl": "BucketOwnerFullControl"
-            }
-        },
-        "AlfrescoSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "Allow access to the Alfresco One instances",
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
-                        "SourceSecurityGroupId": {
-                            "Ref": "ELBSecurityGroup"
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "443",
-                        "ToPort": "443",
-                        "SourceSecurityGroupId": {
-                            "Ref": "ELBSecurityGroup"
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "5701",
-                        "ToPort": "5701",
-                        "CidrIp": {
-                            "Fn::FindInMap": [
-                                "SubnetConfig",
-                                "Alfresco1",
-                                "CIDR"
-                            ]
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "5701",
-                        "ToPort": "5701",
-                        "CidrIp": {
-                            "Fn::FindInMap": [
-                                "SubnetConfig",
-                                "Alfresco2",
-                                "CIDR"
-                            ]
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "8090",
-                        "ToPort": "8090",
-                        "CidrIp": {
-                            "Fn::FindInMap": [
-                                "SubnetConfig",
-                                "Alfresco1",
-                                "CIDR"
-                            ]
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "8090",
-                        "ToPort": "8090",
-                        "CidrIp": {
-                            "Fn::FindInMap": [
-                                "SubnetConfig",
-                                "Alfresco2",
-                                "CIDR"
-                            ]
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": {
-                            "Fn::Join": [
-                                "",
-                                [
-                                    {
-                                        "Fn::GetAtt": [
-                                            "NATInstance2",
-                                            "PrivateIp"
-                                        ]
-                                    },
-                                    "/32"
-                                ]
-                            ]
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": {
-                            "Fn::Join": [
-                                "",
-                                [
-                                    {
-                                        "Fn::GetAtt": [
-                                            "NATInstance1",
-                                            "PrivateIp"
-                                        ]
-                                    },
-                                    "/32"
-                                ]
-                            ]
-                        }
-                    }
-                ],
-                "SecurityGroupEgress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "0",
-                        "ToPort": "65535",
-                        "CidrIp": "0.0.0.0/0"
-                    }
-                ]
             }
         }
     },
