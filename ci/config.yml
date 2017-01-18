@@ -19,4 +19,4 @@ global:
 tests:
   defaults:
     parameter_input: defaults.json
-    template_file: alfresco-one.template
+    template_file: alfresco-one-master.template
