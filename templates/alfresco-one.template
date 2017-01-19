@@ -872,7 +872,7 @@
                 "IpProtocol": "tcp",
                 "FromPort": "5701",
                 "ToPort": "5701",
-                "SourceSecurityGroupName": {
+                "SourceSecurityGroupId": {
                     "Ref": "AlfrescoSecurityGroup"
                 }
             }
@@ -886,7 +886,7 @@
                 "IpProtocol": "tcp",
                 "FromPort": "8090",
                 "ToPort": "8090",
-                "SourceSecurityGroupName": {
+                "SourceSecurityGroupId": {
                     "Ref": "AlfrescoSecurityGroup"
                 }
             }
