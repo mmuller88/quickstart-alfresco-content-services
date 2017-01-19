@@ -11,7 +11,9 @@
                     "Parameters": [
                         "VPCID",
                         "PrivateSubnet1ID",
-                        "PrivateSubnet2ID"
+                        "PrivateSubnet2ID",
+                        "PublicSubnet1ID",
+                        "PublicSubnet2ID"
                     ]
                 },
                 {
@@ -115,6 +117,12 @@
                 },
                 "PrivateSubnet2ID": {
                     "default": "Private Subnet 2 ID"
+                },
+                "PublicSubnet1ID": {
+                    "default": "Public Subnet 1 ID"
+                },
+                "PublicSubnet2ID": {
+                    "default": "Public Subnet 2 ID"
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 Bucket Name"
@@ -259,11 +267,19 @@
             "Type": "String"
         },
         "PrivateSubnet1ID": {
-            "Description": "ID of the private subnet 1 in Availability Zone 1 (e.g., subnet-a0246dcd)",
+            "Description": "ID of the private subnet 1 in Availability Zone 1 for the Alfresco and RDS Instances (e.g., subnet-a0246dcd)",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "PrivateSubnet2ID": {
-            "Description": "ID of the private subnet 2 in Availability Zone 2 (e.g., subnet-a0246dcd)",
+            "Description": "ID of the private subnet 2 in Availability Zone 2 for the Alfresco and RDS Instances (e.g., subnet-b1f432cd)",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "PublicSubnet1ID": {
+            "Description": "ID of the public subnet 1 in Availability Zone 1 for the Elastic Load Balancer(e.g., subnet-9bc642ac)",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "PublicSubnet2ID": {
+            "Description": "ID of the public subnet 2 in Availability Zone 2 for the Elastic Load Balancer(e.g., subnet-e3246d8e)",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "QSS3BucketName": {
@@ -492,7 +508,7 @@
             "Properties": {
                 "GroupDescription": "Allow access to the ELB",
                 "VpcId": {
-                    "Ref": "VPC"
+                    "Ref": "VPCID"
                 },
                 "SecurityGroupIngress": [
                     {
@@ -515,10 +531,10 @@
             "Properties": {
                 "Subnets": [
                     {
-                        "Ref": "NATSubnet1"
+                        "Ref": "PublicSubnet1ID"
                     },
                     {
-                        "Ref": "NATSubnet2"
+                        "Ref": "PublicSubnet2ID"
                     }
                 ],
                 "SecurityGroups": [
@@ -756,10 +772,10 @@
                 "DBSubnetGroupDescription": "Subnets available for the RDS DB Instance",
                 "SubnetIds": [
                     {
-                        "Ref": "RDSSubnet1"
+                        "Ref": "PrivateSubnet1ID"
                     },
                     {
-                        "Ref": "RDSSubnet2"
+                        "Ref": "PrivateSubnet2ID"
                     }
                 ]
             }
@@ -1195,20 +1211,12 @@
         "AlfrescoAutoScalingGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
-                "AvailabilityZones": [
-                    {
-                        "Ref": "AZ1"
-                    },
-                    {
-                        "Ref": "AZ2"
-                    }
-                ],
                 "VPCZoneIdentifier": [
                     {
-                        "Ref": "AlfrescoSubnet1"
+                        "Ref": "PrivateSubnet1ID"
                     },
                     {
-                        "Ref": "AlfrescoSubnet2"
+                        "Ref": "PrivateSubnet2ID"
                     }
                 ],
                 "Cooldown": "600",
@@ -1587,20 +1595,12 @@
         "IndexAutoScalingGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
-                "AvailabilityZones": [
-                    {
-                        "Ref": "AZ2"
-                    },
-                    {
-                        "Ref": "AZ1"
-                    }
-                ],
                 "VPCZoneIdentifier": [
                     {
-                        "Ref": "AlfrescoSubnet2"
+                        "Ref": "PrivateSubnet1ID"
                     },
                     {
-                        "Ref": "AlfrescoSubnet1"
+                        "Ref": "PrivateSubnet2ID"
                     }
                 ],
                 "Cooldown": "300",
