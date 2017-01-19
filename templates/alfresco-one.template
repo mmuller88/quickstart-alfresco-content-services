@@ -47,7 +47,7 @@
                         "IndexNodesMinSize",
                         "IndexNodesMaxSize",
                         "IndexNodesDesiredCapacity",
-                        "OperatorEMail"
+                        "OperatorEmail"
                     ]
                 },
                 {
@@ -109,8 +109,8 @@
                 "KeyPairName": {
                     "default": "SSH Key Name"
                 },
-                "OperatorEMail": {
-                    "default": "Operator EMail"
+                "OperatorEmail": {
+                    "default": "Operator Email"
                 },
                 "PrivateSubnet1ID": {
                     "default": "Private Subnet 1 ID"
@@ -260,7 +260,7 @@
             "Description": "Name of an existing EC2 KeyPair, all instances will launch with this KeyPair",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "OperatorEMail": {
+        "OperatorEmail": {
             "AllowedPattern": "([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)",
             "ConstraintDescription": "Must be a valid email address.",
             "Description": "EMail address to notify if there are any scaling operations",
@@ -496,7 +496,7 @@
                 "Subscription": [
                     {
                         "Endpoint": {
-                            "Ref": "OperatorEMail"
+                            "Ref": "OperatorEmail"
                         },
                         "Protocol": "email"
                     }
