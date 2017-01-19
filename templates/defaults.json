@@ -21,7 +21,7 @@
     },
     {
         "ParameterKey": "AlfrescoTrialLicense",
-        "ParameterValue": "NEED_VALUE"
+        "ParameterValue": "https://s3.amazonaws.com/$[alfred_getlicensebucket]/alfresco/one/license.key"
     },
     {
         "ParameterKey": "AvailabilityZones",
