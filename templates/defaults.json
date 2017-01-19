@@ -64,7 +64,7 @@
         "ParameterValue": "cikey"
     },
     {
-        "ParameterKey": "OperatorEMail",
+        "ParameterKey": "OperatorEmail",
         "ParameterValue": "operator@example.com"
     },
     {
