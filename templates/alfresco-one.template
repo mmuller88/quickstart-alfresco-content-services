@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Alfresco One on AWS workload template that deploys an Alfresco cluster behind an ELB load balancer in two private subnets. The cluster is configured to use an S3 bucket for storage and a multi-AZ MySQL RDS instance for the database. **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(5025)",
+    "Description": "This Alfresco One workload template deploys an Alfresco cluster behind an ELB load balancer in two private subnets. The cluster is configured to use an S3 bucket for storage and a multi-AZ Amazon RDS MySQL instance for the database. **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(5025)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -198,7 +198,7 @@
             "Type": "String"
         },
         "AlfrescoPassword": {
-            "Description": "Password for the Alfresco admin user.",
+            "Description": "Password for the Alfresco admin user",
             "NoEcho": "True",
             "Type": "String"
         },
@@ -324,7 +324,7 @@
             ],
             "ConstraintDescription": "Must contain valid RDS instance type",
             "Default": "db.t2.small",
-            "Description": "EC2 instance type for the Amazon MySQL DB instances",
+            "Description": "EC2 instance type for the Amazon RDS MySQL DB instances",
             "Type": "String"
         },
         "RDSPassword": {
