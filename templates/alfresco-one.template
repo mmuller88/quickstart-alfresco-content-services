@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "This is the Alfresco One on AWS worklaod template which deploys an Alfresco cluster behind an ELB in two private subnets. The cluster is configured to use an S3 bucket for storage and a multi-AZ MySQL RDS instance for the database. **WARNING** This template creates Amazon EC2 instance and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(5025)",
+    "Description": "Alfresco One on AWS workload template that deploys an Alfresco cluster behind an ELB load balancer in two private subnets. The cluster is configured to use an S3 bucket for storage and a multi-AZ MySQL RDS instance for the database. **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(5025)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -184,7 +184,7 @@
         },
         "AlfrescoNodesDesiredCapacity": {
             "Default": "2",
-            "Description": "Specifies the desired capacity for the Alfresco nodes Auto Scaling group",
+            "Description": "The desired capacity for the Alfresco nodes Auto Scaling group",
             "Type": "String"
         },
         "AlfrescoNodesMaxSize": {
@@ -198,17 +198,17 @@
             "Type": "String"
         },
         "AlfrescoPassword": {
-            "Description": "Password for the Alfresco admin user. Introduce your desired password.",
+            "Description": "Password for the Alfresco admin user.",
             "NoEcho": "True",
             "Type": "String"
         },
         "AlfrescoTrialLicense": {
-            "Default": "type a public URL here, i.e. a S3 url with your license",
-            "Description": "URL of your Alfresco trial license *with clustering enabled*. If you don't have one, please ask for it to your Sales representative or to Alfresco Support via http://support.alfresco.com",
+            "Default": "Type a public URL, e.g., URL to an S3 bucket that contains your license",
+            "Description": "URL of your Alfresco trial license *with clustering enabled*. If you don't have a license, please request one from your sales representative or email Alfresco Support at http://support.alfresco.com.",
             "Type": "String"
         },
         "BastionSecurityGroupID": {
-            "Description": "ID of the Bastion Security Group to allow SSH connections from (e.g., sg-7f16e910)",
+            "Description": "ID of the bastion host security group to enable SSH connections (e.g., sg-7f16e910)",
             "Type": "AWS::EC2::SecurityGroup::Id"
         },
         "IndexInstanceType": {
@@ -238,12 +238,12 @@
             ],
             "ConstraintDescription": "Must contain valid instance type",
             "Default": "m4.xlarge",
-            "Description": "Type of EC2 instance for the Alfresco Index instances (Solr)",
+            "Description": "EC2 instance type for the Alfresco Index server (Solr) instances",
             "Type": "String"
         },
         "IndexNodesDesiredCapacity": {
             "Default": "2",
-            "Description": "Specifies the desired capacity for the Index nodes Auto Scaling group",
+            "Description": "The desired capacity for the Auto Scaling group for Index server instances",
             "Type": "String"
         },
         "IndexNodesMaxSize": {
@@ -257,48 +257,48 @@
             "Type": "String"
         },
         "KeyPairName": {
-            "Description": "Name of an existing EC2 KeyPair, all instances will launch with this KeyPair",
+            "Description": "Name of an existing EC2 key pair. All instances will launch with this key pair.",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "OperatorEmail": {
             "AllowedPattern": "([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)",
             "ConstraintDescription": "Must be a valid email address.",
-            "Description": "EMail address to notify if there are any scaling operations",
+            "Description": "Email address that notifications of any scaling operations will be sent to",
             "Type": "String"
         },
         "PrivateSubnet1ID": {
-            "Description": "ID of the private subnet 1 in Availability Zone 1 for the Alfresco and RDS Instances (e.g., subnet-a0246dcd)",
+            "Description": "ID of private subnet 1 in Availability Zone 1 for the Alfresco and RDS DB instances (e.g., subnet-a0246dcd)",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "PrivateSubnet2ID": {
-            "Description": "ID of the private subnet 2 in Availability Zone 2 for the Alfresco and RDS Instances (e.g., subnet-b1f432cd)",
+            "Description": "ID of private subnet 2 in Availability Zone 2 for the Alfresco and RDS DB instances (e.g., subnet-b1f432cd)",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "PublicSubnet1ID": {
-            "Description": "ID of the public subnet 1 in Availability Zone 1 for the Elastic Load Balancer(e.g., subnet-9bc642ac)",
+            "Description": "ID of public subnet 1 in Availability Zone 1 for the ELB load balancer (e.g., subnet-9bc642ac)",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "PublicSubnet2ID": {
-            "Description": "ID of the public subnet 2 in Availability Zone 2 for the Elastic Load Balancer(e.g., subnet-e3246d8e)",
+            "Description": "ID of public subnet 2 in Availability Zone 2 for the ELB load balancer (e.g., subnet-e3246d8e)",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Default": "quickstart-reference",
-            "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Description": "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-]+(/[0-9a-zA-Z-]+)*$",
-            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
+            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/), which is automatically appended.",
             "Default": "alfresco/one/latest",
-            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
+            "Description": "S3 key prefix for the Quick Start assets. This prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with a forward slash (/), which is automatically appended.",
             "Type": "String"
         },
         "RDSDBName": {
             "Default": "alfresco",
-            "Description": "DB Name for the RDS MySQL database",
+            "Description": "DB name for the Amazon RDS MySQL database",
             "Type": "String"
         },
         "RDSInstanceType": {
@@ -324,26 +324,26 @@
             ],
             "ConstraintDescription": "Must contain valid RDS instance type",
             "Default": "db.t2.small",
-            "Description": "Type of EC2 instance for the MySQL DB instances",
+            "Description": "EC2 instance type for the Amazon MySQL DB instances",
             "Type": "String"
         },
         "RDSPassword": {
-            "Description": "Password for the RDS MySQL database",
+            "Description": "Password for the Amazon RDS MySQL database",
             "NoEcho": "True",
             "Type": "String"
         },
         "RDSUsername": {
             "Default": "alfresco",
-            "Description": "Username for the RDS MySQL database",
+            "Description": "User name for the Amazon RDS MySQL database",
             "Type": "String"
         },
         "S3BucketName": {
             "Default": "",
-            "Description": "Name of the S3 bucket that Alfresco should use to store data. Note: This bucket will be created, enter a unique name, do not use contain uppercase characters.",
+            "Description": "Name of the S3 bucket that will be created for Alfresco to store data. Enter a unique name that does not include uppercase characters.",
             "Type": "String"
         },
         "VPCID": {
-            "Description": "VPC ID",
+            "Description": "ID of your existing VPC for deployment",
             "Type": "AWS::EC2::VPC::Id"
         }
     },
