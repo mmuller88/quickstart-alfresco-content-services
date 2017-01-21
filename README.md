@@ -1,10 +1,14 @@
 Quick Start Alfresco One
 ========================
 
-*Disclaimer:* This CloudFormation template should be considered for illustrative and reference purposes only. No warranty is expressed or implied. Improvements and any other contributions are encouraged and appreciated.
+This Quick Start reference deployment includes architectural considerations and configurations used to build an Alfresco One environment on the Amazon Web Services (AWS) cloud. We discuss how to build and configure the necessary AWS services, such as Amazon Elastic Compute Cloud (Amazon EC2) and Amazon Virtual Private Cloud (Amazon VPC) to deploy a highly available Alfresco One cluster across separate AWS Availability Zones.
+
+Deployment Guide: http://docs.aws.amazon.com/quickstart/
+
+*Disclaimer:* This CloudFormation template should be considered for illustrative and reference purposes. No warranty is expressed or implied. Improvements and any other contributions are encouraged and appreciated.
 
 *Notes:*
-* Extensive documentation about how to use this template is also available at http://aws.amazon.com/quiskstart/community
+* Extensive documentation about how to use this template is also available at http://aws.amazon.com/quiskstart/
 * GovCloud and China regions are not supported in this release.
 * Chef-Alfresco is used to configure each instance, not Chef knowledge is required.
 
@@ -21,8 +25,6 @@ This template will instantiate a 2-node Alfresco cluster with 2 dedicated Index 
 * Each Alfresco and Index node will be in a separate Availability Zone.
 * We use a pre-baked AMI. Our official Alfresco One AMI published in the AWS Marketplace, based on CentOS7.
 * Auto-scaling rules that will add extra Alfresco and Index nodes when certain performance thresholds are reached.
-* Result of the AWS CloudFormation template deployment:
-![AWS Alfresco diagram](https://github.com/Alfresco/alfresco-cloudformation-chef/blob/master/img/aws-alfresco.png "AWS Alfresco Diagram")
 
 Requirements
 -----------
@@ -31,38 +33,6 @@ Requirements
 * Subscribe to CentOS7 AMI in AWS Marketplace (more details below)
 * Alfresco CloudFormation template that you can find in this GitHub repo.
 
-
-Basic Usage
------------
-There are a number of tasks that you must complete as part of the deployment.
-
-Before launching the AWS CloudFormation template, you must:
-* Create an Amazon EC2 key pair
-	* The Amazon EC2 key pair provides SSH access to the instances created by the AWS CloudFormation template. If you already have a key pair you would like to use, you can skip this step.  
-To create a key pair, use the instructions on https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html.
-* Accept terms to use the CentOS 7 AMI from the AWS Market.
-	* Alfresco One and its index servers use CentOS 7 as base operating systems for this environment. To be able to use the CentOS 7 AMI, accept the use conditions from this page (login to your AWS account): https://aws.amazon.com/marketplace/pp/B00O7WM7QW
-Click Continue. You’ll then see the Launch on EC2 page. Finally, select the Manual Launch tab, and then click Accept Terms.
-* Launch the [AWS Console](http://aws.amazon.com/console/cloudformation)
-* Click *Create Stack*.
-* Name and upload the Alfresco CloudFormation Template.
-* Click *Continue*.
-* Fill out the form making sure you review the following:
-	* Ask for your trial license to your Alfresco Sales representative or Alfresco Support.
-	* Ensure you use the name of an unique S3 bucket to be created.
-	* Verify the instance sizes and be mindful of the hourly costs (that can be reviewed in the next section).
-	* Provide the logins and passwords for the database and Alfresco admin accounts. These accounts and passwords will be created & set by the template.
-	* Ensure you set the correct EC2 key.
-* Click *Continue* and finish the wizard.
-
-Tips
-----
-* The stack will take around 20 minutes to COMPLETE, but then you need another 20 minutes to have Alfresco One available (it depends on the AWS Region and instance types because Alfresco and its components has to be reconfigured and started).
-* Use the *Events* tab to review status and any errors.
-* Once the environment starts, use the *Output* tab to get the URL of the load-balancer.
-* If stack deletion does not complete and the *Events* show an error related to VPC, login to the VPC console and delete the corresponding VPC; then delete the stack again.
-* Internals of the deployment:
-![AWS Alfresco diagram internals](https://github.com/Alfresco/alfresco-cloudformation-chef/blob/master/img/aws-alfresco-inside.png "AWS Alfresco diagram internals")
 
 Considerations for Production Environments
 ------------------------------------------
@@ -93,16 +63,16 @@ Best Practices Applied
 Troubleshooting:
 ----------------
 ### SSH access
-* First, jump to one of your NAT servers (note: ec2-user):
+* First, jump to one of your Bastion servers (note: ec2-user):
 
 ```
-ssh -i your-priv-key.pem ec2-user@NAT-PUBLIC-IP
+ssh -i your-priv-key.pem ec2-user@BASTION-PUBLIC-IP
 ```
 
 * Copy your private SSH key to that NAT from your workstation:
 
 ```
-scp -i your-priv-key.pem your-priv-key.pem ec2-user@NAT-PUBLIC-IP:/home/ec2-user
+scp -i your-priv-key.pem your-priv-key.pem ec2-user@BASTION-PUBLIC-IP:/home/ec2-user
 ```
 
 * In the NAT server, set the appropriate permissions to the private key file:
