@@ -24,10 +24,7 @@
                     },
                     "Parameters": [
                         "KeyPairName",
-                        "Bastion1InstanceType",
-                        "Bastion1PrivateIP",
-                        "Bastion2InstanceType",
-                        "Bastion2PrivateIP",
+                        "BastionInstanceType",
                         "AlfrescoInstanceType",
                         "IndexInstanceType"
                     ]
@@ -99,17 +96,8 @@
                 "AvailabilityZones": {
                     "default": "Availability Zones"
                 },
-                "Bastion1InstanceType": {
-                    "default": "Bastion 1 Instance Type"
-                },
-                "Bastion1PrivateIP": {
-                    "default": "Bastion 1 Private IP Address"
-                },
-                "Bastion2InstanceType": {
-                    "default": "Bastion 2 Instance Type"
-                },
-                "Bastion2PrivateIP": {
-                    "default": "Bastion 2 Private IP Address"
+                "BastionInstanceType": {
+                    "default": "Bastion Instance Type"
                 },
                 "IndexInstanceType": {
                     "default": "Index Servers Instance Type"
@@ -231,10 +219,7 @@
             "Description": "List of Availability Zones to use for the subnets in the VPC. Only two Availability Zones are used for this deployment, and the logical order of your selections is preserved.",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"
         },
-        "Bastion1InstanceType": {
-            "Description": "EC2 instance type for the first bastion host instance located in Availability Zone 1",
-            "Type": "String",
-            "Default": "t2.micro",
+        "BastionInstanceType": {
             "AllowedValues": [
                 "t2.nano",
                 "t2.micro",
@@ -248,39 +233,9 @@
                 "m4.xlarge",
                 "m4.2xlarge",
                 "m4.4xlarge"
-            ]
-        },
-        "Bastion1PrivateIP": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
-            "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
-            "Default": "10.0.128.5",
-            "Description": "Fixed private IP for the first bastion host instance located in Availability Zone 1",
-            "Type": "String"
-        },
-        "Bastion2InstanceType": {
-            "Description": "EC2 instance type for the second bastion host instance located in Availability Zone 2",
-            "Type": "String",
+            ],
             "Default": "t2.micro",
-            "AllowedValues": [
-                "t2.nano",
-                "t2.micro",
-                "t2.small",
-                "t2.medium",
-                "t2.large",
-                "m3.large",
-                "m3.xlarge",
-                "m3.2xlarge",
-                "m4.large",
-                "m4.xlarge",
-                "m4.2xlarge",
-                "m4.4xlarge"
-            ]
-        },
-        "Bastion2PrivateIP": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
-            "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
-            "Default": "10.0.144.5",
-            "Description": "Fixed private IP for the second bastion host instance located in Availability Zone 2",
+            "Description": "Amazon EC2 instance type for the bastion instances",
             "Type": "String"
         },
         "IndexInstanceType": {
@@ -580,19 +535,10 @@
                     ]
                 },
                 "Parameters": {
-                    "Bastion1InstanceType": {
-                        "Ref": "Bastion1InstanceType"
+                    "BastionAMIOS": "Amazon-Linux-HVM",
+                    "BastionInstanceType": {
+                        "Ref": "BastionInstanceType"
                     },
-                    "Bastion1PrivateIP": {
-                        "Ref": "Bastion1PrivateIP"
-                    },
-                    "Bastion2InstanceType": {
-                        "Ref": "Bastion2InstanceType"
-                    },
-                    "Bastion2PrivateIP": {
-                        "Ref": "Bastion2PrivateIP"
-                    },
-                    "BastionAMIOS": "AmazonLinuxHVM",
                     "KeyPairName": {
                         "Ref": "KeyPairName"
                     },
@@ -612,7 +558,15 @@
                         "Ref": "QSS3BucketName"
                     },
                     "QSS3KeyPrefix": {
-                        "Ref": "QSS3KeyPrefix"
+                        "Fn::Join": [
+                            "/",
+                            [
+                                {
+                                    "Ref": "QSS3KeyPrefix"
+                                },
+                                "submodules/quickstart-linux-bastion"
+                            ]
+                        ]
                     },
                     "RemoteAccessCIDR": {
                         "Ref": "RemoteAccessCIDR"
