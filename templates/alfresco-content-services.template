@@ -336,7 +336,8 @@
             "Type": "String"
         },
         "S3BucketName": {
-            "Default": "",
+            "AllowedPattern": "^[a-z0-9][a-z0-9-.]*$",
+            "Default": "type-unique-value-here-in-lowercase",
             "Description": "Name of the S3 bucket that will be created for Alfresco to store data. Enter a unique name that does not include uppercase characters.",
             "Type": "String"
         },
@@ -505,18 +506,6 @@
         }
     },
     "Conditions": {
-        "CustomS3BucketName": {
-            "Fn::Not": [
-                {
-                    "Fn::Equals": [
-                        {
-                            "Ref": "S3BucketName"
-                        },
-                        ""
-                    ]
-                }
-            ]
-        },
         "isFrankfurt": {
             "Fn::Equals": [
                 {
@@ -2304,15 +2293,7 @@
             "DeletionPolicy": "Retain",
             "Properties": {
                 "BucketName": {
-                    "Fn::If": [
-                        "CustomS3BucketName",
-                        {
-                            "Ref": "S3BucketName"
-                        },
-                        {
-                            "Ref": "AWS::NoValue"
-                        }
-                    ]
+                    "Ref": "S3BucketName"
                 },
                 "AccessControl": "BucketOwnerFullControl"
             }

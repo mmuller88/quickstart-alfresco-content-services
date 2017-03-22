@@ -28,6 +28,10 @@
         "ParameterValue": "$[alfred_getaz_2]"
     },
     {
+        "ParameterKey": "BastionAMIOS",
+        "ParameterValue": "Amazon-Linux-HVM"
+    },
+    {
         "ParameterKey": "BastionInstanceType",
         "ParameterValue": "t2.micro"
     },
@@ -93,7 +97,7 @@
     },
     {
         "ParameterKey": "S3BucketName",
-        "ParameterValue": ""
+        "ParameterValue": "alfred-develop-quickstart-alfresco-content-services-$[alfred_genuuid]"
     },
     {
         "ParameterKey": "VPCCIDR",
