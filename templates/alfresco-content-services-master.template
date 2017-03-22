@@ -361,13 +361,13 @@
         },
         "RDSInstanceType": {
             "AllowedValues": [
-              "db.t2.small",
-              "db.t2.medium",
-              "db.r3.large",
-              "db.r3.xlarge",
-              "db.r3.2xlarge",
-              "db.r3.4xlarge",
-              "db.r3.8xlarge"
+                "db.t2.small",
+                "db.t2.medium",
+                "db.r3.large",
+                "db.r3.xlarge",
+                "db.r3.2xlarge",
+                "db.r3.4xlarge",
+                "db.r3.8xlarge"
             ],
             "ConstraintDescription": "Must contain valid RDS instance type",
             "Default": "db.t2.small",
@@ -574,7 +574,7 @@
                         "Ref": "QSS3BucketName"
                     },
                     "QSS3KeyPrefix": {
-                         "Fn::Join": [
+                        "Fn::Join": [
                             "/",
                             [
                                 {
@@ -601,27 +601,27 @@
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
-                  "Fn::Join": [
-                      "/",
-                      [
-                          {
-                              "Fn::FindInMap": [
-                                  "AWSInfoRegionMap",
-                                  {
-                                      "Ref": "AWS::Region"
-                                  },
-                                  "QuickStartS3URL"
-                              ]
-                          },
-                          {
-                              "Ref": "QSS3BucketName"
-                          },
-                          {
-                              "Ref": "QSS3KeyPrefix"
-                          },
-                          "templates/alfresco-content-services.template"
-                      ]
-                  ]
+                    "Fn::Join": [
+                        "/",
+                        [
+                            {
+                                "Fn::FindInMap": [
+                                    "AWSInfoRegionMap",
+                                    {
+                                        "Ref": "AWS::Region"
+                                    },
+                                    "QuickStartS3URL"
+                                ]
+                            },
+                            {
+                                "Ref": "QSS3BucketName"
+                            },
+                            {
+                                "Ref": "QSS3KeyPrefix"
+                            },
+                            "templates/alfresco-content-services.template"
+                        ]
+                    ]
                 },
                 "Parameters": {
                     "AlfrescoInstanceType": {
