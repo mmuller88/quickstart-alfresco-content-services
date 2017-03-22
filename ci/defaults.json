@@ -97,7 +97,7 @@
     },
     {
         "ParameterKey": "S3BucketName",
-        "ParameterValue": "alfred-develop-$[alfred_genuuid]-alfresco"
+        "ParameterValue": "alfred-develop-alfresco-$[alfred_genuuid]"
     },
     {
         "ParameterKey": "VPCCIDR",
