@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "This master template creates a VPC infrastructure for a multi-AZ, multi-tier deployment of Alfresco One on AWS. It deploys a VPC with bastions and an Alfresco cluster behind an ELB. The cluster is configured to use an S3 bucket for storage and a multi-AZ Amazon RDS MySQL instance for the database. **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template.",
+    "Description": "This master template creates a VPC infrastructure for a multi-AZ, multi-tier deployment of Alfresco Content Services on AWS. It deploys a VPC with bastions and an Alfresco cluster behind an ELB. The cluster is configured to use an S3 bucket for storage and a multi-AZ Amazon RDS MySQL instance for the database. **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template.",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -24,6 +24,7 @@
                     },
                     "Parameters": [
                         "KeyPairName",
+                        "BastionAMIOS",
                         "BastionInstanceType",
                         "AlfrescoInstanceType",
                         "IndexInstanceType"
@@ -58,6 +59,7 @@
                     },
                     "Parameters": [
                         "RDSInstanceType",
+                        "RDSAllocatedStorage",
                         "RDSDBName",
                         "RDSUsername",
                         "RDSPassword",
@@ -95,6 +97,9 @@
                 },
                 "AvailabilityZones": {
                     "default": "Availability Zones"
+                },
+                "BastionAMIOS": {
+                    "default": "Bastion AMI Operating System"
                 },
                 "BastionInstanceType": {
                     "default": "Bastion Instance Type"
@@ -140,6 +145,9 @@
                 },
                 "RDSInstanceType": {
                     "default": "RDS Instance Type"
+                },
+                "RDSAllocatedStorage": {
+                    "default": "RDS Allocated Storage"
                 },
                 "RDSPassword": {
                     "default": "RDS Password"
@@ -218,6 +226,17 @@
         "AvailabilityZones": {
             "Description": "List of Availability Zones to use for the subnets in the VPC. Only two Availability Zones are used for this deployment, and the logical order of your selections is preserved.",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"
+        },
+        "BastionAMIOS": {
+            "AllowedValues": [
+                "Amazon-Linux-HVM",
+                "CentOS-7-HVM",
+                "Ubuntu-Server-14.04-LTS-HVM",
+                "Ubuntu-Server-16.04-LTS-HVM"
+            ],
+            "Default": "Amazon-Linux-HVM",
+            "Description": "The Linux distribution for the AMI to be used for the bastion instances",
+            "Type": "String"
         },
         "BastionInstanceType": {
             "AllowedValues": [
@@ -337,43 +356,37 @@
         },
         "RDSDBName": {
             "Default": "alfresco",
-            "Description": "DB name for the Amazon RDS MySQL database",
+            "Description": "DB name for the Amazon RDS Aurora database (MySQL if Frankfurt)",
             "Type": "String"
         },
         "RDSInstanceType": {
             "AllowedValues": [
-                "db.t2.medium",
-                "db.t2.large",
-                "db.m3.medium",
-                "db.m3.large",
-                "db.m3.xlarge",
-                "db.m3.2xlarge",
-                "db.r3.large",
-                "db.r3.xlarge",
-                "db.r3.2xlarge",
-                "db.r3.4xlarge",
-                "db.r3.8xlarge",
-                "db.t2.micro",
-                "db.t2.small",
-                "db.t2.medium",
-                "db.t2.large",
-                "db.m4.medium",
-                "db.m4.large",
-                "db.m4.xlarge"
+              "db.t2.small",
+              "db.t2.medium",
+              "db.r3.large",
+              "db.r3.xlarge",
+              "db.r3.2xlarge",
+              "db.r3.4xlarge",
+              "db.r3.8xlarge"
             ],
             "ConstraintDescription": "Must contain valid RDS instance type",
             "Default": "db.t2.small",
-            "Description": "EC2 instance type for the Amazon RDS MySQL DB instances",
+            "Description": "EC2 instance type for the Amazon RDS DB instances",
             "Type": "String"
         },
         "RDSPassword": {
-            "Description": "Password for the Amazon RDS MySQL database",
+            "Description": "Password for the Amazon RDS database. Minimum 8 characters.",
             "NoEcho": "True",
             "Type": "String"
         },
         "RDSUsername": {
             "Default": "alfresco",
-            "Description": "User name for the Amazon RDS MySQL database",
+            "Description": "User name for the Amazon RDS database",
+            "Type": "String"
+        },
+        "RDSAllocatedStorage": {
+            "Default": "5",
+            "Description": "Size in GB for the Amazon RDS MySQL database allocated storage (only Frankfurt)",
             "Type": "String"
         },
         "RemoteAccessCIDR": {
@@ -383,7 +396,8 @@
             "Type": "String"
         },
         "S3BucketName": {
-            "Default": "",
+            "AllowedPattern": "^[a-z0-9][a-z0-9-.]*$",
+            "Default": "type-unique-value-here-in-lowercase",
             "Description": "Name of the S3 bucket that will be created for Alfresco to store data. Enter a unique name that does not include uppercase characters.",
             "Type": "String"
         },
@@ -535,7 +549,9 @@
                     ]
                 },
                 "Parameters": {
-                    "BastionAMIOS": "Amazon-Linux-HVM",
+                    "BastionAMIOS": {
+                        "Ref": "BastionAMIOS"
+                    },
                     "BastionInstanceType": {
                         "Ref": "BastionInstanceType"
                     },
@@ -558,7 +574,7 @@
                         "Ref": "QSS3BucketName"
                     },
                     "QSS3KeyPrefix": {
-                        "Fn::Join": [
+                         "Fn::Join": [
                             "/",
                             [
                                 {
@@ -585,27 +601,27 @@
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Join": [
-                        "/",
-                        [
-                            {
-                                "Fn::FindInMap": [
-                                    "AWSInfoRegionMap",
-                                    {
-                                        "Ref": "AWS::Region"
-                                    },
-                                    "QuickStartS3URL"
-                                ]
-                            },
-                            {
-                                "Ref": "QSS3BucketName"
-                            },
-                            {
-                                "Ref": "QSS3KeyPrefix"
-                            },
-                            "templates/alfresco-one.template"
-                        ]
-                    ]
+                  "Fn::Join": [
+                      "/",
+                      [
+                          {
+                              "Fn::FindInMap": [
+                                  "AWSInfoRegionMap",
+                                  {
+                                      "Ref": "AWS::Region"
+                                  },
+                                  "QuickStartS3URL"
+                              ]
+                          },
+                          {
+                              "Ref": "QSS3BucketName"
+                          },
+                          {
+                              "Ref": "QSS3KeyPrefix"
+                          },
+                          "templates/alfresco-content-services.template"
+                      ]
+                  ]
                 },
                 "Parameters": {
                     "AlfrescoInstanceType": {
