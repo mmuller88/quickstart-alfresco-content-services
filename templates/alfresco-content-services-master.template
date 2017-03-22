@@ -386,7 +386,7 @@
         },
         "RDSAllocatedStorage": {
             "Default": "5",
-            "Description": "Size in GB for the Amazon RDS MySQL database allocated storage (only Frankfurt)",
+            "Description": "Size in GiB for the Amazon RDS MySQL database allocated storage (only Frankfurt)",
             "Type": "String"
         },
         "RemoteAccessCIDR": {
