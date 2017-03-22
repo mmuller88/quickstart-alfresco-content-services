@@ -1306,7 +1306,7 @@
                                             {
                                                 "Ref": "QSS3KeyPrefix"
                                             },
-                                            "scripts/share-51.json"
+                                            "scripts/share-52.json"
                                         ]
                                     ]
                                 },
