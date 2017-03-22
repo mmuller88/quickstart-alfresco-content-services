@@ -97,7 +97,7 @@
     },
     {
         "ParameterKey": "S3BucketName",
-        "ParameterValue": "alfred-develop-quickstart-alfresco-content-services-$[alfred_genuuid]"
+        "ParameterValue": "alfred-develop-quickstart-alfresco-content-services-$[alfred_genuuid]-s3bucket"
     },
     {
         "ParameterKey": "VPCCIDR",
