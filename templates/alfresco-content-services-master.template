@@ -356,7 +356,7 @@
         },
         "RDSDBName": {
             "Default": "alfresco",
-            "Description": "DB name for the Amazon RDS Aurora database (MySQL if Frankfurt)",
+            "Description": "DB name for the Amazon RDS Aurora database (MySQL if non-Amazon Aurora region)",
             "Type": "String"
         },
         "RDSInstanceType": {
@@ -386,7 +386,7 @@
         },
         "RDSAllocatedStorage": {
             "Default": "5",
-            "Description": "Size in GiB for the Amazon RDS MySQL database allocated storage (only Frankfurt)",
+            "Description": "Size in GiB for the Amazon RDS MySQL database allocated storage (only non-Amazon Aurora region)",
             "Type": "String"
         },
         "RemoteAccessCIDR": {
