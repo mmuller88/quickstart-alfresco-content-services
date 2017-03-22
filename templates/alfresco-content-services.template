@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "This Alfresco Content Services 5.2 workload template deploys an Alfresco cluster behind an ELB load balancer in two private subnets. The cluster is configured to use an S3 bucket for storage and a multi-AZ Amazon RDS Aurora instance for the database (MySQL for Frankfurt). **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(5025)",
+    "Description": "This Alfresco Content Services 5.2 workload template deploys an Alfresco cluster behind an ELB load balancer in two private subnets. The cluster is configured to use an S3 bucket for storage and a multi-AZ Amazon RDS Aurora instance for the database (MySQL for non-Amazon Aurora regions). **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(5025)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -302,7 +302,7 @@
         },
         "RDSDBName": {
             "Default": "alfresco",
-            "Description": "DB name for the Amazon RDS Aurora database (MySQL if Frankfurt).",
+            "Description": "DB name for the Amazon RDS Aurora database (MySQL if non-Amazon Aurora region).",
             "Type": "String"
         },
         "RDSInstanceType": {
@@ -332,7 +332,7 @@
         },
         "RDSAllocatedStorage": {
             "Default": "5",
-            "Description": "Size in GiB for the Amazon RDS MySQL database allocated storage (only Frankfurt)",
+            "Description": "Size in GiB for the Amazon RDS MySQL database allocated storage (only non-Amazon Aurora region)",
             "Type": "String"
         },
         "S3BucketName": {
@@ -1496,7 +1496,7 @@
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                "    --resource AlfrescoASLaunchConfigFrankfurt",
+                                "    --resource AlfrescoASLaunchConfigMySQL",
                                 "    --configsets Install2AndRun",
                                 "    --region     ",
                                 {
@@ -2136,7 +2136,7 @@
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                "    --resource IndexASLaunchConfigFrankfurt",
+                                "    --resource IndexASLaunchConfigMySQL",
                                 "    --configsets Install2AndRun ",
                                 "    --region     ",
                                 {
