@@ -506,22 +506,37 @@
         }
     },
     "Conditions": {
-        "isFrankfurt": {
-            "Fn::Equals": [
+        "isAmazonAuroraRegion": {
+            "Fn::Not": [
                 {
-                    "Ref": "AWS::Region"
-                },
-                "eu-central-1"
+                    "Condition": "isNotAmazonAuroraRegion"
+                }
             ]
         },
-        "isNotFrankfurt": {
-            "Fn::Not": [
+        "isNotAmazonAuroraRegion": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "ap-southeast-1"
+                    ]
+                },
                 {
                     "Fn::Equals": [
                         {
                             "Ref": "AWS::Region"
                         },
                         "eu-central-1"
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "sa-east-1"
                     ]
                 }
             ]
@@ -839,7 +854,7 @@
         },
         "RDSDBInstance": {
             "Type": "AWS::RDS::DBInstance",
-            "Condition": "isFrankfurt",
+            "Condition": "isNotAmazonAuroraRegion",
             "Properties": {
                 "MultiAZ": "true",
                 "VPCSecurityGroups": [
@@ -869,9 +884,9 @@
             },
             "DeletionPolicy": "Snapshot"
         },
-        "RDSCluster": {
+        "RDSDBCluster": {
             "Type": "AWS::RDS::DBCluster",
-            "Condition": "isNotFrankfurt",
+            "Condition": "isAmazonAuroraRegion",
             "Properties": {
                 "MasterUsername": {
                     "Ref": "RDSUsername"
@@ -895,14 +910,14 @@
         },
         "RDSDBInstance1": {
             "Type": "AWS::RDS::DBInstance",
-            "Condition": "isNotFrankfurt",
+            "Condition": "isAmazonAuroraRegion",
             "Properties": {
                 "DBSubnetGroupName": {
                     "Ref": "RDSDBSubnetGroup"
                 },
                 "Engine": "aurora",
                 "DBClusterIdentifier": {
-                    "Ref": "RDSCluster"
+                    "Ref": "RDSDBCluster"
                 },
                 "PubliclyAccessible": "false",
                 "DBInstanceClass": {
@@ -912,14 +927,14 @@
         },
         "RDSDBInstance2": {
             "Type": "AWS::RDS::DBInstance",
-            "Condition": "isNotFrankfurt",
+            "Condition": "isAmazonAuroraRegion",
             "Properties": {
                 "DBSubnetGroupName": {
                     "Ref": "RDSDBSubnetGroup"
                 },
                 "Engine": "aurora",
                 "DBClusterIdentifier": {
-                    "Ref": "RDSCluster"
+                    "Ref": "RDSDBCluster"
                 },
                 "PubliclyAccessible": "false",
                 "DBInstanceClass": {
@@ -1007,11 +1022,11 @@
         "AlfrescoASLaunchConfig": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "DependsOn": [
-                "RDSCluster",
+                "RDSDBCluster",
                 "RDSDBInstance1",
                 "RDSDBInstance2"
             ],
-            "Condition": "isNotFrankfurt",
+            "Condition": "isAmazonAuroraRegion",
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "configSets": {
@@ -1085,7 +1100,7 @@
                                             "sed -i 's/@@DB_HOST@@/",
                                             {
                                                 "Fn::GetAtt": [
-                                                    "RDSCluster",
+                                                    "RDSDBCluster",
                                                     "Endpoint.Address"
                                                 ]
                                             },
@@ -1257,10 +1272,10 @@
                 }
             }
         },
-        "AlfrescoASLaunchConfigFrankfurt": {
+        "AlfrescoASLaunchConfigMySQL": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "DependsOn": "RDSDBInstance",
-            "Condition": "isFrankfurt",
+            "Condition": "isNotAmazonAuroraRegion",
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "configSets": {
@@ -1599,12 +1614,12 @@
                 "HealthCheckType": "EC2",
                 "LaunchConfigurationName": {
                     "Fn::If": [
-                        "isNotFrankfurt",
+                        "isAmazonAuroraRegion",
                         {
                             "Ref": "AlfrescoASLaunchConfig"
                         },
                         {
-                            "Ref": "AlfrescoASLaunchConfigFrankfurt"
+                            "Ref": "AlfrescoASLaunchConfigMySQL"
                         }
                     ]
                 },
@@ -1651,7 +1666,7 @@
         "IndexASLaunchConfig": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "DependsOn": "AlfrescoASLaunchConfig",
-            "Condition": "isNotFrankfurt",
+            "Condition": "isAmazonAuroraRegion",
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "configSets": {
@@ -1725,7 +1740,7 @@
                                             "sed -i 's/@@DB_HOST@@/",
                                             {
                                                 "Fn::GetAtt": [
-                                                    "RDSCluster",
+                                                    "RDSDBCluster",
                                                     "Endpoint.Address"
                                                 ]
                                             },
@@ -1897,10 +1912,10 @@
                 }
             }
         },
-        "IndexASLaunchConfigFrankfurt": {
+        "IndexASLaunchConfigMySQL": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
-            "DependsOn": "AlfrescoASLaunchConfigFrankfurt",
-            "Condition": "isFrankfurt",
+            "DependsOn": "AlfrescoASLaunchConfigMySQL",
+            "Condition": "isNotAmazonAuroraRegion",
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "configSets": {
@@ -2239,12 +2254,12 @@
                 "HealthCheckType": "EC2",
                 "LaunchConfigurationName": {
                     "Fn::If": [
-                        "isNotFrankfurt",
+                        "isAmazonAuroraRegion",
                         {
                             "Ref": "IndexASLaunchConfig"
                         },
                         {
-                            "Ref": "IndexASLaunchConfigFrankfurt"
+                            "Ref": "IndexASLaunchConfigMySQL"
                         }
                     ]
                 },
