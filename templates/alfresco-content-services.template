@@ -296,7 +296,7 @@
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-]+(/[0-9a-zA-Z-]+)*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/), which is automatically appended.",
-            "Default": "alfresco/one/latest",
+            "Default": "alfresco/content/services/latest",
             "Description": "S3 key prefix for the Quick Start assets. This prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with a forward slash (/), which is automatically appended.",
             "Type": "String"
         },
@@ -332,12 +332,11 @@
         },
         "RDSAllocatedStorage": {
             "Default": "5",
-            "Description": "Size in GB for the Amazon RDS MySQL database allocated storage (only Frankfurt)",
+            "Description": "Size in GiB for the Amazon RDS MySQL database allocated storage (only Frankfurt)",
             "Type": "String"
         },
         "S3BucketName": {
-            "AllowedPattern": "^[a-z0-9][a-z0-9-.]*$",
-            "Default": "type-unique-value-here-in-lowercase",
+            "Default": "",
             "Description": "Name of the S3 bucket that will be created for Alfresco to store data. Enter a unique name that does not include uppercase characters.",
             "Type": "String"
         },
@@ -371,43 +370,43 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "ALFRESCOONEHVM": "Alfresco Content Services 5.2.0 AMI 0.0.41"
+                "ALFRESCOCS52": "Alfresco Content Services 5.2.0 AMI 0.0.41"
             },
             "ap-northeast-1": {
-                "ALFRESCOONEHVM": "ami-a99bcece"
+                "ALFRESCOCS52": "ami-a99bcece"
             },
             "ap-northeast-2": {
-                "ALFRESCOONEHVM": "ami-f920f097"
+                "ALFRESCOCS52": "ami-f920f097"
             },
             "ap-south-1": {
-                "ALFRESCOONEHVM": "ami-981d6df7"
+                "ALFRESCOCS52": "ami-981d6df7"
             },
             "ap-southeast-1": {
-                "ALFRESCOONEHVM": "ami-9208b9f1"
+                "ALFRESCOCS52": "ami-9208b9f1"
             },
             "ap-southeast-2": {
-                "ALFRESCOONEHVM": "ami-82cecde1"
+                "ALFRESCOCS52": "ami-82cecde1"
             },
             "eu-central-1": {
-                "ALFRESCOONEHVM": "ami-7de53012"
+                "ALFRESCOCS52": "ami-7de53012"
             },
             "eu-west-1": {
-                "ALFRESCOONEHVM": "ami-1d68467b"
+                "ALFRESCOCS52": "ami-1d68467b"
             },
             "sa-east-1": {
-                "ALFRESCOONEHVM": "ami-5587e139"
+                "ALFRESCOCS52": "ami-5587e139"
             },
             "us-east-1": {
-                "ALFRESCOONEHVM": "ami-ac9d43ba"
+                "ALFRESCOCS52": "ami-ac9d43ba"
             },
             "us-east-2": {
-                "ALFRESCOONEHVM": "ami-c4bb9ea1"
+                "ALFRESCOCS52": "ami-c4bb9ea1"
             },
             "us-west-1": {
-                "ALFRESCOONEHVM": "ami-3c97c95c"
+                "ALFRESCOCS52": "ami-3c97c95c"
             },
             "us-west-2": {
-                "ALFRESCOONEHVM": "ami-16f97b76"
+                "ALFRESCOCS52": "ami-16f97b76"
             }
         },
         "AWSInfoRegionMap": {
@@ -1005,7 +1004,29 @@
                     "Install": {
                         "files": {
                             "/etc/chef/chef-client.json": {
-                                "source": "https://s3.amazonaws.com/cfn-templates-qs/scripts/share-52.json",
+                              "source": {
+                                  "Fn::Join": [
+                                      "/",
+                                      [
+                                          {
+                                              "Fn::FindInMap": [
+                                                  "AWSInfoRegionMap",
+                                                  {
+                                                      "Ref": "AWS::Region"
+                                                  },
+                                                  "QuickStartS3URL"
+                                              ]
+                                          },
+                                          {
+                                              "Ref": "QSS3BucketName"
+                                          },
+                                          {
+                                              "Ref": "QSS3KeyPrefix"
+                                          },
+                                          "scripts/share-52.json"
+                                      ]
+                                  ]
+                                },
                                 "mode": "000700",
                                 "owner": "root",
                                 "group": "root"
@@ -1112,29 +1133,28 @@
                                 "group": "root"
                             },
                             "/etc/chef/run.sh": {
-                                "content": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "#!/bin/bash\n",
-                                            "cd /etc/chef; chef-client -z -j chef-client.json\n",
-                                            "systemctl stop mysql-default\n",
-                                            "systemctl disable mysql-default\n",
-                                            "yum remove -y mysql-server\n",
-                                            "rm -fr /etc/mysql-default* /var/lib/mysql* /var/log/mysql-default* /usr/lib/systemd/system/mysql-default.service\n",
-                                            "service solr stop\n",
-                                            "chkconfig --del solr\n",
-                                            "rm -rf /opt/alfresco-search-services /var/solr /etc/init.d/solr /etc/sysconfig/solr /var/log/solr /etc/default/solr.in.sh \n",
-                                            "userdel -r solr\n",
-                                            "rm -fr /etc/chef/chef-client.json\n",
-                                            "rm -fr /etc/chef/nodes/*.json\n",
-                                            "chmod 700 /usr/share/tomcat/shared/classes/alfresco-global.properties\n",
-                                            "chmod 700 /usr/share/tomcat/shared/classes/alfresco/web-extension/share-cluster-application-context.xml\n",
-                                            "rm -fr /etc/chef/replaceValues.sh\n",
-                                            "rm -fr /etc/chef/run.sh\n",
-                                            "systemctl restart tomcat-alfresco\n"
-                                        ]
-                                    ]
+                              "source": {
+                                  "Fn::Join": [
+                                      "/",
+                                      [
+                                          {
+                                              "Fn::FindInMap": [
+                                                  "AWSInfoRegionMap",
+                                                  {
+                                                      "Ref": "AWS::Region"
+                                                  },
+                                                  "QuickStartS3URL"
+                                              ]
+                                          },
+                                          {
+                                              "Ref": "QSS3BucketName"
+                                          },
+                                          {
+                                              "Ref": "QSS3KeyPrefix"
+                                          },
+                                          "scripts/run-share.sh"
+                                      ]
+                                  ]
                                 },
                                 "mode": "000700",
                                 "owner": "root",
@@ -1164,7 +1184,7 @@
                         {
                             "Ref": "AWS::Region"
                         },
-                        "ALFRESCOONEHVM"
+                        "ALFRESCOCS52"
                     ]
                 },
                 "InstanceMonitoring": "true",
@@ -1233,7 +1253,29 @@
                     "Install2": {
                         "files": {
                             "/etc/chef/chef-client.json": {
-                                "source": "https://s3.amazonaws.com/cfn-templates-qs/scripts/share-52.json",
+                              "source": {
+                                  "Fn::Join": [
+                                      "/",
+                                      [
+                                          {
+                                              "Fn::FindInMap": [
+                                                  "AWSInfoRegionMap",
+                                                  {
+                                                      "Ref": "AWS::Region"
+                                                  },
+                                                  "QuickStartS3URL"
+                                              ]
+                                          },
+                                          {
+                                              "Ref": "QSS3BucketName"
+                                          },
+                                          {
+                                              "Ref": "QSS3KeyPrefix"
+                                          },
+                                          "scripts/share-51.json"
+                                      ]
+                                  ]
+                                },
                                 "mode": "000700",
                                 "owner": "root",
                                 "group": "root"
@@ -1340,28 +1382,28 @@
                                 "group": "root"
                             },
                             "/etc/chef/run.sh": {
-                                "content": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "#!/bin/bash\n",
-                                            "cd /etc/chef; chef-client -z -j chef-client.json\n",
-                                            "systemctl stop mysql-default\n",
-                                            "systemctl disable mysql-default\n",
-                                            "yum remove -y mysql-server\n",
-                                            "rm -fr /etc/mysql-default* /var/lib/mysql* /var/log/mysql-default* /usr/lib/systemd/system/mysql-default.service\n",
-                                            "service solr stop\n",
-                                            "chkconfig --del solr\n",
-                                            "rm -rf /opt/alfresco-search-services /var/solr /etc/init.d/solr /etc/sysconfig/solr /var/log/solr /etc/default/solr.in.sh \n",
-                                            "userdel -r solr\n",
-                                            "rm -fr /etc/chef/chef-client.json\n",
-                                            "rm -fr /etc/chef/nodes/*.json\n",
-                                            "chmod 700 /usr/share/tomcat/shared/classes/alfresco-global.properties\n",
-                                            "chmod 700 /usr/share/tomcat/shared/classes/alfresco/web-extension/share-cluster-application-context.xml\n",
-                                            "rm -fr /etc/chef/replaceValues.sh\n",
-                                            "rm -fr /etc/chef/run.sh\n"
-                                        ]
-                                    ]
+                              "source": {
+                                  "Fn::Join": [
+                                      "/",
+                                      [
+                                          {
+                                              "Fn::FindInMap": [
+                                                  "AWSInfoRegionMap",
+                                                  {
+                                                      "Ref": "AWS::Region"
+                                                  },
+                                                  "QuickStartS3URL"
+                                              ]
+                                          },
+                                          {
+                                              "Ref": "QSS3BucketName"
+                                          },
+                                          {
+                                              "Ref": "QSS3KeyPrefix"
+                                          },
+                                          "scripts/run-share-fk.sh"
+                                      ]
+                                  ]
                                 },
                                 "mode": "000700",
                                 "owner": "root",
@@ -1391,7 +1433,7 @@
                         {
                             "Ref": "AWS::Region"
                         },
-                        "ALFRESCOONEHVM"
+                        "ALFRESCOCS52"
                     ]
                 },
                 "InstanceMonitoring": "true",
@@ -1600,7 +1642,29 @@
                     "Install": {
                         "files": {
                             "/etc/chef/chef-client.json": {
-                                "source": "https://s3.amazonaws.com/cfn-templates-qs/scripts/solr-52.json",
+                              "source": {
+                                  "Fn::Join": [
+                                      "/",
+                                      [
+                                          {
+                                              "Fn::FindInMap": [
+                                                  "AWSInfoRegionMap",
+                                                  {
+                                                      "Ref": "AWS::Region"
+                                                  },
+                                                  "QuickStartS3URL"
+                                              ]
+                                          },
+                                          {
+                                              "Ref": "QSS3BucketName"
+                                          },
+                                          {
+                                              "Ref": "QSS3KeyPrefix"
+                                          },
+                                          "scripts/solr-52.json"
+                                      ]
+                                  ]
+                                },
                                 "mode": "000700",
                                 "owner": "root",
                                 "group": "root"
@@ -1707,35 +1771,28 @@
                                 "group": "root"
                             },
                             "/etc/chef/run.sh": {
-                                "content": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "#!/bin/bash\n",
-                                            "cd /etc/chef; chef-client -z -j chef-client.json\n",
-                                            "systemctl stop nginx\n",
-                                            "systemctl disable nginx\n",
-                                            "yum remove -y nginx\n",
-                                            "systemctl disable haproxy\n",
-                                            "systemctl stop haproxy\n",
-                                            "yum remove -y haproxy\n",
-                                            "rm -fr /etc/haproxy/haproxy.cfg\n",
-                                            "rm -fr /var/log/haproxy\n",
-                                            "systemctl stop mysql-default\n",
-                                            "systemctl disable mysql-default\n",
-                                            "systemctl stop tomcat-share\n",
-                                            "systemctl disable tomcat-share\n",
-                                            "yum remove -y mysql-server\n",
-                                            "rm -fr /etc/mysql-default* /var/lib/mysql* /var/log/mysql-default* /usr/lib/systemd/system/mysql-default.service\n",
-                                            "rm -fr /etc/tomcat-share /var/lib/tomcat-share /usr/share/tomcat-share /var/log/tomcat-share /var/cache/tomcat-share /etc/sysconfig/tomcat-share /usr/lib/systemd/system/tomcat-share.service\n",
-                                            "rm -fr /etc/chef/chef-client.json\n",
-                                            "rm -fr /etc/chef/nodes/*.json\n",
-                                            "chmod 700 /usr/share/tomcat/shared/classes/alfresco-global.properties\n",
-                                            "rm -fr /etc/chef/replaceValues.sh\n",
-                                            "rm -fr /etc/chef/run.sh\n",
-                                            "systemctl restart tomcat-alfresco\n"
-                                        ]
-                                    ]
+                              "source": {
+                                  "Fn::Join": [
+                                      "/",
+                                      [
+                                          {
+                                              "Fn::FindInMap": [
+                                                  "AWSInfoRegionMap",
+                                                  {
+                                                      "Ref": "AWS::Region"
+                                                  },
+                                                  "QuickStartS3URL"
+                                              ]
+                                          },
+                                          {
+                                              "Ref": "QSS3BucketName"
+                                          },
+                                          {
+                                              "Ref": "QSS3KeyPrefix"
+                                          },
+                                          "scripts/run-index.sh"
+                                      ]
+                                  ]
                                 },
                                 "mode": "000700",
                                 "owner": "root",
@@ -1765,7 +1822,7 @@
                         {
                             "Ref": "AWS::Region"
                         },
-                        "ALFRESCOONEHVM"
+                        "ALFRESCOCS52"
                     ]
                 },
                 "InstanceMonitoring": "true",
@@ -1834,7 +1891,29 @@
                     "Install2": {
                         "files": {
                             "/etc/chef/chef-client.json": {
-                                "source": "https://s3.amazonaws.com/cfn-templates-qs/scripts/solr-52.json",
+                              "source": {
+                                  "Fn::Join": [
+                                      "/",
+                                      [
+                                          {
+                                              "Fn::FindInMap": [
+                                                  "AWSInfoRegionMap",
+                                                  {
+                                                      "Ref": "AWS::Region"
+                                                  },
+                                                  "QuickStartS3URL"
+                                              ]
+                                          },
+                                          {
+                                              "Ref": "QSS3BucketName"
+                                          },
+                                          {
+                                              "Ref": "QSS3KeyPrefix"
+                                          },
+                                          "scripts/solr-52.json"
+                                      ]
+                                  ]
+                                },
                                 "mode": "000700",
                                 "owner": "root",
                                 "group": "root"
@@ -1941,34 +2020,28 @@
                                 "group": "root"
                             },
                             "/etc/chef/run.sh": {
-                                "content": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "#!/bin/bash\n",
-                                            "cd /etc/chef; chef-client -z -j chef-client.json\n",
-                                            "systemctl stop nginx\n",
-                                            "systemctl disable nginx\n",
-                                            "yum remove -y nginx\n",
-                                            "systemctl disable haproxy\n",
-                                            "systemctl stop haproxy\n",
-                                            "yum remove -y haproxy\n",
-                                            "rm -fr /etc/haproxy/haproxy.cfg\n",
-                                            "rm -fr /var/log/haproxy\n",
-                                            "systemctl stop mysql-default\n",
-                                            "systemctl disable mysql-default\n",
-                                            "systemctl stop tomcat-share\n",
-                                            "systemctl disable tomcat-share\n",
-                                            "yum remove -y mysql-server\n",
-                                            "rm -fr /etc/mysql-default* /var/lib/mysql* /var/log/mysql-default* /usr/lib/systemd/system/mysql-default.service\n",
-                                            "rm -fr /etc/tomcat-share /var/lib/tomcat-share /usr/share/tomcat-share /var/log/tomcat-share /var/cache/tomcat-share /etc/sysconfig/tomcat-share /usr/lib/systemd/system/tomcat-share.service\n",
-                                            "rm -fr /etc/chef/chef-client.json\n",
-                                            "rm -fr /etc/chef/nodes/*.json\n",
-                                            "chmod 700 /usr/share/tomcat/shared/classes/alfresco-global.properties\n",
-                                            "rm -fr /etc/chef/replaceValues.sh\n",
-                                            "rm -fr /etc/chef/run.sh\n"
-                                        ]
-                                    ]
+                              "source": {
+                                  "Fn::Join": [
+                                      "/",
+                                      [
+                                          {
+                                              "Fn::FindInMap": [
+                                                  "AWSInfoRegionMap",
+                                                  {
+                                                      "Ref": "AWS::Region"
+                                                  },
+                                                  "QuickStartS3URL"
+                                              ]
+                                          },
+                                          {
+                                              "Ref": "QSS3BucketName"
+                                          },
+                                          {
+                                              "Ref": "QSS3KeyPrefix"
+                                          },
+                                          "scripts/run-index-fk.sh"
+                                      ]
+                                  ]
                                 },
                                 "mode": "000700",
                                 "owner": "root",
@@ -1998,7 +2071,7 @@
                         {
                             "Ref": "AWS::Region"
                         },
-                        "ALFRESCOONEHVM"
+                        "ALFRESCOCS52"
                     ]
                 },
                 "InstanceMonitoring": "true",

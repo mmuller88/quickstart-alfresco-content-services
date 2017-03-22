@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "This Alfresco Content Services 5.2 workload template deploys an Alfresco cluster behind an ELB load balancer in two private subnets. The cluster is configured to use an S3 bucket for storage and a multi-AZ Amazon RDS Aurora instance for the database (MySQL for Frankfurt). **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(5025)",
+    "Description": "This master template creates a VPC infrastructure for a multi-AZ, multi-tier deployment of Alfresco Content Services on AWS. It deploys a VPC with bastions and an Alfresco cluster behind an ELB. The cluster is configured to use an S3 bucket for storage and a multi-AZ Amazon RDS MySQL instance for the database. **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template.",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
