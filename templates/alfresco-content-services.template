@@ -1195,7 +1195,7 @@
                                                 "Fn::If": [
                                                     "isAmazonAuroraRegion",
                                                     "scripts/run-share.sh",
-                                                    "scripts/run-share-fk.sh"
+                                                    "scripts/run-share-na.sh"
                                                 ]
                                             }
                                         ]
@@ -1594,7 +1594,7 @@
                                                 "Fn::If": [
                                                     "isAmazonAuroraRegion",
                                                     "scripts/run-index.sh",
-                                                    "scripts/run-index-fk.sh"
+                                                    "scripts/run-index-na.sh"
                                                 ]
                                             }
                                         ]
