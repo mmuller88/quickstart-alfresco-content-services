@@ -388,11 +388,17 @@
             "ap-southeast-2": {
                 "ALFRESCOCS52": "ami-82cecde1"
             },
+            "ca-central-1": {
+                "ALFRESCOCS52": "ami-5c70cd38"
+            },
             "eu-central-1": {
                 "ALFRESCOCS52": "ami-7de53012"
             },
             "eu-west-1": {
                 "ALFRESCOCS52": "ami-1d68467b"
+            },
+            "eu-west-2": {
+                "ALFRESCOCS52": "ami-74c1d410"
             },
             "sa-east-1": {
                 "ALFRESCOCS52": "ami-5587e139"
