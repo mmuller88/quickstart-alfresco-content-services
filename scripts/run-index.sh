@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /etc/chef; chef-client -z -j chef-client.json
+cd /etc/chef; chef-client -z -j chef-client.json | tee /var/log/chef.log
 systemctl stop nginx
 systemctl disable nginx
 yum remove -y nginx
@@ -16,9 +16,9 @@ systemctl disable tomcat-share
 yum remove -y mysql-server
 rm -fr /etc/mysql-default* /var/lib/mysql* /var/log/mysql-default* /usr/lib/systemd/system/mysql-default.service
 rm -fr /etc/tomcat-share /var/lib/tomcat-share /usr/share/tomcat-share /var/log/tomcat-share /var/cache/tomcat-share /etc/sysconfig/tomcat-share /usr/lib/systemd/system/tomcat-share.service
-rm -fr /etc/chef/chef-client.json
-rm -fr /etc/chef/nodes/*.json
+#rm -fr /etc/chef/chef-client.json
+#rm -fr /etc/chef/nodes/*.json
 chmod 700 /usr/share/tomcat/shared/classes/alfresco-global.properties
-rm -fr /etc/chef/replaceValues.sh
-rm -fr /etc/chef/run.sh
+#rm -fr /etc/chef/replaceValues.sh
+#rm -fr /etc/chef/run.sh
 systemctl restart tomcat-alfresco
