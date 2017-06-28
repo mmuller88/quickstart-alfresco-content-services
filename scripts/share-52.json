@@ -22,6 +22,9 @@
     "nginx" : {
       "use_nossl_config" : true
     },
+    "libreoffice" : {
+      "initialise" : true
+    },
     "alfresco" : {
         "components" : ["haproxy","nginx","tomcat","transform","repo","share","googledocs","aos"],
         "db_ssl_enabled" : true,

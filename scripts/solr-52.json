@@ -19,6 +19,9 @@
         "yum_lock_timeout" : 120
       }
      },
+     "libreoffice" : {
+       "initialise" : true
+     },
     "alfresco" : {
         "components" : ["tomcat","transform","repo","solr6"],
         "db_ssl_enabled" : true,
