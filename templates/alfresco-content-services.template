@@ -869,7 +869,7 @@
                     "Ref": "RDSDBName"
                 }
             },
-            "DeletionPolicy": "Snapshot"
+            "DeletionPolicy": "Delete"
         },
         "RDSDBCluster": {
             "Type": "AWS::RDS::DBCluster",
