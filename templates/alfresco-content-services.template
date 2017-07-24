@@ -869,11 +869,12 @@
                     "Ref": "RDSDBName"
                 }
             },
-            "DeletionPolicy": "Delete"
+            "DeletionPolicy": "Snapshot"
         },
         "RDSDBCluster": {
             "Type": "AWS::RDS::DBCluster",
             "Condition": "isAmazonAuroraRegion",
+            "DeletionPolicy": "Snapshot",
             "Properties": {
                 "MasterUsername": {
                     "Ref": "RDSUsername"
