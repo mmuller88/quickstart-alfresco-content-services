@@ -798,14 +798,6 @@
                 ]
             }
         },
-        "CfnKeys": {
-            "Type": "AWS::IAM::AccessKey",
-            "Properties": {
-                "UserName": {
-                    "Ref": "AlfrescoUser"
-                }
-            }
-        },
         "RDSDBSubnetGroup": {
             "Type": "AWS::RDS::DBSubnetGroup",
             "Properties": {
@@ -1046,17 +1038,10 @@
                                             },
                                             "/g' /etc/chef/chef-client.json\n",
                                             "sed -i 's/@@AWS_ACCESS_KEY@@/",
-                                            {
-                                                "Ref": "CfnKeys"
-                                            },
+                                            
                                             "/g' /etc/chef/chef-client.json\n",
                                             "sed -i 's#@@AWS_SECRET_KEY@@#",
-                                            {
-                                                "Fn::GetAtt": [
-                                                    "CfnKeys",
-                                                    "SecretAccessKey"
-                                                ]
-                                            },
+                                            
                                             "#g' /etc/chef/chef-client.json\n",
                                             "sed -i 's/@@DB_HOST@@/",
                                             {
