@@ -1037,12 +1037,6 @@
                                                     "DNSName"
                                                 ]
                                             },
-                                            "/g' /etc/chef/chef-client.json\n",
-                                            "sed -i 's/@@AWS_ACCESS_KEY@@/",
-                                            
-                                            "/g' /etc/chef/chef-client.json\n",
-                                            "sed -i 's#@@AWS_SECRET_KEY@@#",
-                                            
                                             "#g' /etc/chef/chef-client.json\n",
                                             "sed -i 's/@@DB_HOST@@/",
                                             {
@@ -1392,19 +1386,6 @@
                                                 "Fn::GetAtt": [
                                                     "ElasticLoadBalancer",
                                                     "DNSName"
-                                                ]
-                                            },
-                                            "/g' /etc/chef/chef-client.json\n",
-                                            "sed -i 's/@@AWS_ACCESS_KEY@@/",
-                                            {
-                                                "Ref": "CfnKeys"
-                                            },
-                                            "/g' /etc/chef/chef-client.json\n",
-                                            "sed -i 's#@@AWS_SECRET_KEY@@#",
-                                            {
-                                                "Fn::GetAtt": [
-                                                    "CfnKeys",
-                                                    "SecretAccessKey"
                                                 ]
                                             },
                                             "#g' /etc/chef/chef-client.json\n",
