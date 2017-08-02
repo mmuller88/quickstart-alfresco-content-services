@@ -39,8 +39,6 @@
         "generate.share.config.custom" : true,
         "shareproperties" : {
           "hz_aws_enabled" : true,
-          "hz_aws_access_key" : "@@AWS_ACCESS_KEY@@",
-          "hz_aws_secret_key" : "@@AWS_SECRET_KEY@@",
           "hz_aws_sg_name" : "@@AWS_SG_NAME@@",
           "hz_aws_tag_key" : "haproxy-role",
           "hz_aws_tag_value" : "share",
