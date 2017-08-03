@@ -1388,7 +1388,7 @@
                                                     "DNSName"
                                                 ]
                                             },
-                                            "#g' /etc/chef/chef-client.json\n",
+                                            "/g' /etc/chef/chef-client.json\n",
                                             "sed -i 's/@@DB_HOST@@/",
                                             {
                                                 "Fn::If": [
