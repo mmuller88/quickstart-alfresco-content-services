@@ -49,8 +49,6 @@
         },
         "properties" : {
             "jodconverter.officeHome" : "/opt/libreoffice5.2/",
-            "s3.accessKey" : "@@AWS_ACCESS_KEY@@",
-            "s3.secretKey" : "@@AWS_SECRET_KEY@@",
             "db.host" : "@@DB_HOST@@",
             "db.dbname" : "@@DB_NAME@@",
             "db.username" : "@@DB_USERNAME@@",
