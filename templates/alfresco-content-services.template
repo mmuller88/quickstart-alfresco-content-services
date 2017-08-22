@@ -894,7 +894,8 @@
                 "DBSubnetGroupName": {
                     "Ref": "RDSDBSubnetGroup"
                 }
-            }
+            },
+            "DeletionPolicy": "Snapshot"
         },
         "RDSDBInstance1": {
             "Type": "AWS::RDS::DBInstance",
@@ -911,7 +912,8 @@
                 "DBInstanceClass": {
                     "Ref": "RDSInstanceType"
                 }
-            }
+            },
+            "DeletionPolicy": "Delete"
         },
         "RDSDBInstance2": {
             "Type": "AWS::RDS::DBInstance",
@@ -928,7 +930,8 @@
                 "DBInstanceClass": {
                     "Ref": "RDSInstanceType"
                 }
-            }
+            },
+            "DeletionPolicy": "Delete"
         },
         "AlfrescoSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
