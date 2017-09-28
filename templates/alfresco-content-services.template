@@ -689,7 +689,12 @@
                                     "Effect": "Allow",
                                     "Action": [
                                         "s3:CreateBucket",
-                                        "s3:DeleteBucket"
+                                        "s3:DeleteBucket",
+                                        "s3:GetObject",
+                                        "s3:PutObject",
+                                        "s3:DeleteObject",
+                                        "s3:AbortMultipartUpload",
+                                        "s3:ListMultipartUploadParts"
                                     ],
                                     "Resource": {
                                         "Fn::Join": [
@@ -794,12 +799,12 @@
             }
         },
         "CfnKeys": {
-            "Type": "AWS::IAM::AccessKey",
-            "Properties": {
-                "UserName": {
-                    "Ref": "AlfrescoUser"
-                }
-            }
+          "Type": "AWS::IAM::AccessKey",
+          "Properties": {
+              "UserName": {
+                  "Ref": "AlfrescoUser"
+              }
+          }
         },
         "RDSDBSubnetGroup": {
             "Type": "AWS::RDS::DBSubnetGroup",
@@ -869,6 +874,7 @@
         "RDSDBCluster": {
             "Type": "AWS::RDS::DBCluster",
             "Condition": "isAmazonAuroraRegion",
+            "DeletionPolicy": "Snapshot",
             "Properties": {
                 "MasterUsername": {
                     "Ref": "RDSUsername"
@@ -888,7 +894,8 @@
                 "DBSubnetGroupName": {
                     "Ref": "RDSDBSubnetGroup"
                 }
-            }
+            },
+            "DeletionPolicy": "Snapshot"
         },
         "RDSDBInstance1": {
             "Type": "AWS::RDS::DBInstance",
@@ -905,7 +912,8 @@
                 "DBInstanceClass": {
                     "Ref": "RDSInstanceType"
                 }
-            }
+            },
+            "DeletionPolicy": "Delete"
         },
         "RDSDBInstance2": {
             "Type": "AWS::RDS::DBInstance",
@@ -922,7 +930,8 @@
                 "DBInstanceClass": {
                     "Ref": "RDSInstanceType"
                 }
-            }
+            },
+            "DeletionPolicy": "Delete"
         },
         "AlfrescoSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
@@ -1404,19 +1413,6 @@
                                                 ]
                                             },
                                             "/g' /etc/chef/chef-client.json\n",
-                                            "sed -i 's/@@AWS_ACCESS_KEY@@/",
-                                            {
-                                                "Ref": "CfnKeys"
-                                            },
-                                            "/g' /etc/chef/chef-client.json\n",
-                                            "sed -i 's#@@AWS_SECRET_KEY@@#",
-                                            {
-                                                "Fn::GetAtt": [
-                                                    "CfnKeys",
-                                                    "SecretAccessKey"
-                                                ]
-                                            },
-                                            "#g' /etc/chef/chef-client.json\n",
                                             "sed -i 's/@@DB_HOST@@/",
                                             {
                                                 "Fn::If": [
